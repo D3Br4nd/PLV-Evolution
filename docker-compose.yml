@@ -1,0 +1,75 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        # image: 'dunglas/frankenphp:php8.4'
+        environment:
+            SERVER_NAME: 'http://:8000'
+            APP_URL: 'https://evo.prolocoventicano.com'
+            APP_KEY: '${APP_KEY:-base64:xgH1qY6U+d9wYY3xZ8J7sK/8j4n9l1k0m2o3p4q5r6s=}'
+            APP_DEBUG: 'true'
+            DB_CONNECTION: 'pgsql'
+            DB_HOST: 'db'
+            DB_PORT: '5432'
+            DB_DATABASE: '${DB_DATABASE:-plv_saas}'
+            DB_USERNAME: '${DB_USERNAME:-sail}'
+            DB_PASSWORD: '${DB_PASSWORD:-password}'
+            REDIS_HOST: 'redis'
+            REDIS_PASSWORD: '${REDIS_PASSWORD:-null}'
+            REDIS_PORT: '6379'
+        volumes:
+            - '.:/app'
+        depends_on:
+            - db
+            - redis
+        networks:
+            - plv_network
+
+    db:
+        image: 'postgres:18.1'
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:-plv_saas}'
+            POSTGRES_USER: '${DB_USERNAME:-sail}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-password}'
+        volumes:
+            - './docker/pgsql:/var/lib/postgresql'
+        networks:
+            - plv_network
+        healthcheck:
+            test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE:-plv_saas}", "-U", "${DB_USERNAME:-sail}"]
+            retries: 3
+            timeout: 5s
+
+    redis:
+        image: 'redis:8.4.0'
+        volumes:
+            - './docker/redis:/data'
+        networks:
+            - plv_network
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+
+    reverb:
+        image: 'dunglas/frankenphp:php8.4'
+        command: php artisan reverb:start --host="0.0.0.0" --port=8080
+        environment:
+            APP_KEY: '${APP_KEY:-base64:xgH1qY6U+d9wYY3xZ8J7sK/8j4n9l1k0m2o3p4q5r6s=}'
+            REVERB_APP_ID: '${REVERB_APP_ID:-app-id}'
+            REVERB_APP_KEY: '${REVERB_APP_KEY:-app-key}'
+            REVERB_APP_SECRET: '${REVERB_APP_SECRET:-app-secret}'
+            REVERB_HOST: "0.0.0.0"
+            REVERB_PORT: 8080
+            REVERB_SCHEME: "http"
+        volumes:
+            - '.:/app'
+        networks:
+            - plv_network
+        depends_on:
+            - redis
+
+networks:
+    plv_network:
+        external: true
