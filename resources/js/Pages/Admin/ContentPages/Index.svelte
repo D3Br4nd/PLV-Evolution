@@ -1,6 +1,7 @@
 <script>
     import AdminLayout from "@/layouts/AdminLayout.svelte";
     import { router } from "@inertiajs/svelte";
+    import { page } from "@inertiajs/svelte";
     import { Button } from "@/lib/components/ui/button";
     import { Input } from "@/lib/components/ui/input";
     import { Textarea } from "@/lib/components/ui/textarea";
@@ -8,7 +9,8 @@
     import * as Card from "@/lib/components/ui/card";
     import * as Table from "@/lib/components/ui/table";
 
-    let { pages, flash } = $props();
+    let { pages } = $props();
+    let flash = $derived($page.props.flash);
 
     let processing = $state(false);
     let editing = $state(null);
@@ -40,12 +42,12 @@
     function submit() {
         processing = true;
         if (editing) {
-            router.put(route("content-pages.update", editing.id), form, {
+            router.put(`/admin/content-pages/${editing.id}`, form, {
                 preserveScroll: true,
                 onFinish: () => (processing = false),
             });
         } else {
-            router.post(route("content-pages.store"), form, {
+            router.post("/admin/content-pages", form, {
                 preserveScroll: true,
                 onSuccess: reset,
                 onFinish: () => (processing = false),
@@ -55,7 +57,7 @@
 
     function remove(pageId) {
         if (!confirm("Eliminare questa pagina?")) return;
-        router.delete(route("content-pages.destroy", pageId), {
+        router.delete(`/admin/content-pages/${pageId}`, {
             preserveScroll: true,
         });
     }
@@ -70,12 +72,10 @@
                     Pagine pubbliche pubblicabili su <code>/p/{'{'}slug{'}'}</code>.
                 </p>
             </div>
-            <button
-                onclick={reset}
-                class="text-sm text-zinc-300 hover:text-white underline"
-            >
-                Nuova pagina
-            </button>
+            <!-- "Nuova pagina" is redundant: the form is already visible; use it only while editing -->
+            {#if editing}
+                <Button variant="outline" onclick={reset}>Nuova pagina</Button>
+            {/if}
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -92,6 +92,9 @@
                             >Titolo</label
                         >
                         <Input id="cp-title" bind:value={form.title} />
+                        {#if $page.props.errors?.title}
+                            <p class="text-sm text-destructive">{$page.props.errors.title}</p>
+                        {/if}
                     </div>
                     <div class="space-y-1.5">
                         <label for="cp-slug" class="text-xs text-muted-foreground"
@@ -103,6 +106,9 @@
                             placeholder="lascia vuoto per auto"
                             class="font-mono text-xs"
                         />
+                        {#if $page.props.errors?.slug}
+                            <p class="text-sm text-destructive">{$page.props.errors.slug}</p>
+                        {/if}
                     </div>
                     <div class="space-y-1.5">
                         <label
@@ -111,12 +117,18 @@
                             >Excerpt</label
                         >
                         <Input id="cp-excerpt" bind:value={form.excerpt} />
+                        {#if $page.props.errors?.excerpt}
+                            <p class="text-sm text-destructive">{$page.props.errors.excerpt}</p>
+                        {/if}
                     </div>
                     <div class="space-y-1.5">
                         <label for="cp-body" class="text-xs text-muted-foreground"
                             >Body</label
                         >
                         <Textarea id="cp-body" bind:value={form.body} rows={10} />
+                        {#if $page.props.errors?.body}
+                            <p class="text-sm text-destructive">{$page.props.errors.body}</p>
+                        {/if}
                     </div>
                     <div class="flex items-center justify-between gap-3">
                         <select

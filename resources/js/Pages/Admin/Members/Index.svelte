@@ -9,7 +9,8 @@
     import * as Table from "@/lib/components/ui/table";
     import * as Dialog from "@/lib/components/ui/dialog";
 
-    let { users, flash } = $props();
+    let { users } = $props();
+    let flash = $derived($page.props.flash);
     let canManageRoles = $derived($page.props.auth?.can?.manageRoles);
 
     let search = $state("");
@@ -29,7 +30,7 @@
         clearTimeout(timer);
         timer = setTimeout(() => {
             router.get(
-                route("members.index"),
+                "/admin/members",
                 { search: search },
                 { preserveState: true, replace: true },
             );
@@ -65,7 +66,7 @@
         if (!deleteConfirmationUserId) return;
 
         processing = true;
-        router.delete(route("members.destroy", deleteConfirmationUserId), {
+        router.delete(`/admin/members/${deleteConfirmationUserId}`, {
             onFinish: () => {
                 processing = false;
                 closeDeleteModal();
@@ -83,10 +84,14 @@
 
     function createMember() {
         processing = true;
-        router.post(route("members.store"), newMemberForm, {
+        router.post("/admin/members", newMemberForm, {
             onSuccess: () => {
                 closeNewMemberModal();
                 newMemberForm = { name: "", email: "", role: "member" };
+            },
+            onError: () => {
+                // Keep dialog open so validation errors are visible.
+                isNewMemberOpen = true;
             },
             onFinish: () => {
                 processing = false;
@@ -96,7 +101,7 @@
 
     function updateUserRole(userId, role) {
         router.patch(
-            route("members.role.update", userId),
+            `/admin/members/${userId}/role`,
             { role },
             { preserveScroll: true, preserveState: true },
         );
@@ -115,6 +120,13 @@
             </div>
             <Button onclick={openNewMemberModal}>Nuovo socio</Button>
         </div>
+
+        {#if flash?.success}
+            <div class="text-sm text-green-600 dark:text-green-400">{flash.success}</div>
+        {/if}
+        {#if flash?.error}
+            <div class="text-sm text-destructive">{flash.error}</div>
+        {/if}
 
         <!-- Search -->
         <div class="flex items-center space-x-2">
@@ -236,11 +248,17 @@
 
             <div class="mt-4 space-y-3">
                 <Input bind:value={newMemberForm.name} placeholder="Nome" />
+                {#if $page.props.errors?.name}
+                    <p class="text-sm text-destructive">{$page.props.errors.name}</p>
+                {/if}
                 <Input
                     bind:value={newMemberForm.email}
                     type="email"
                     placeholder="Email"
                 />
+                {#if $page.props.errors?.email}
+                    <p class="text-sm text-destructive">{$page.props.errors.email}</p>
+                {/if}
                 {#if canManageRoles}
                     <select
                         bind:value={newMemberForm.role}

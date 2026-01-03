@@ -1,8 +1,9 @@
 <script>
     import AdminLayout from "../../layouts/AdminLayout.svelte";
+    let { stats } = $props();
 </script>
 
-<AdminLayout>
+<AdminLayout title="Dashboard">
     <div class="space-y-6">
         <!-- Page Header -->
         <div class="border-b border-border pb-4">
@@ -21,9 +22,9 @@
                     </h3>
                 </div>
                 <div class="mt-2">
-                    <p class="text-3xl font-bold text-foreground">248</p>
+                    <p class="text-3xl font-bold text-foreground">{stats?.membersTotal ?? 0}</p>
                     <p class="mt-1 text-xs text-muted-foreground">
-                        +12 questo mese
+                        Attivi ({new Date().getFullYear()}): {stats?.membersActive ?? 0}
                     </p>
                 </div>
             </div>
@@ -31,13 +32,13 @@
             <div class="rounded-lg border border-border bg-card p-6">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-medium text-muted-foreground">
-                        Eventi Attivi
+                        Eventi
                     </h3>
                 </div>
                 <div class="mt-2">
-                    <p class="text-3xl font-bold text-foreground">8</p>
+                    <p class="text-3xl font-bold text-foreground">{stats?.eventsTotal ?? 0}</p>
                     <p class="mt-1 text-xs text-muted-foreground">
-                        3 in programma
+                        In programma: {stats?.eventsUpcoming ?? 0}
                     </p>
                 </div>
             </div>
@@ -45,13 +46,13 @@
             <div class="rounded-lg border border-border bg-card p-6">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-medium text-muted-foreground">
-                        Progetti
+                        Task
                     </h3>
                 </div>
                 <div class="mt-2">
-                    <p class="text-3xl font-bold text-foreground">15</p>
+                    <p class="text-3xl font-bold text-foreground">{stats?.projectsTotal ?? 0}</p>
                     <p class="mt-1 text-xs text-muted-foreground">
-                        5 completati
+                        Completati: {stats?.projectsDone ?? 0}
                     </p>
                 </div>
             </div>
@@ -59,85 +60,23 @@
             <div class="rounded-lg border border-border bg-card p-6">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-medium text-muted-foreground">
-                        Volontari
+                        Contenuti
                     </h3>
                 </div>
                 <div class="mt-2">
-                    <p class="text-3xl font-bold text-foreground">42</p>
+                    <p class="text-3xl font-bold text-foreground">—</p>
                     <p class="mt-1 text-xs text-muted-foreground">
-                        Attivi oggi
+                        (in arrivo)
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="rounded-lg border border-border bg-card">
-            <div class="border-b border-border p-6">
-                <h2 class="text-lg font-semibold text-foreground">
-                    Attività Recente
-                </h2>
-            </div>
-            <div class="p-6">
-                <div class="space-y-4">
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium"
-                        >
-                            MR
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-foreground">
-                                Nuovo socio registrato
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                Mario Rossi si è iscritto alla Pro Loco
-                            </p>
-                            <p class="mt-1 text-xs text-muted-foreground">
-                                2 ore fa
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-xs font-medium"
-                        >
-                            EV
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-foreground">
-                                Evento aggiornato
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                Fiera Campionaria 2025 - Data modificata
-                            </p>
-                            <p class="mt-1 text-xs text-muted-foreground">
-                                5 ore fa
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-medium"
-                        >
-                            PR
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-foreground">
-                                Progetto completato
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                Restauro fontana del centro storico
-                            </p>
-                            <p class="mt-1 text-xs text-muted-foreground">
-                                1 giorno fa
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="rounded-lg border border-border bg-card p-6">
+            <h2 class="text-lg font-semibold text-foreground">Attività recente</h2>
+            <p class="mt-2 text-sm text-muted-foreground">
+                Nessuna attività da mostrare (sezione in arrivo).
+            </p>
         </div>
     </div>
 </AdminLayout>

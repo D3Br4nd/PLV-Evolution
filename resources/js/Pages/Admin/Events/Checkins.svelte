@@ -1,12 +1,14 @@
 <script>
     import AdminLayout from "@/layouts/AdminLayout.svelte";
     import { router } from "@inertiajs/svelte";
+    import { page } from "@inertiajs/svelte";
     import { Button } from "@/lib/components/ui/button";
     import { Input } from "@/lib/components/ui/input";
     import * as Card from "@/lib/components/ui/card";
     import * as Table from "@/lib/components/ui/table";
 
-    let { event, checkins, flash } = $props();
+    let { event, checkins } = $props();
+    let flash = $derived($page.props.flash);
 
     let qr_token = $state("");
     let processing = $state(false);
@@ -15,7 +17,7 @@
         if (!qr_token.trim()) return;
         processing = true;
         router.post(
-            route("events.checkins.store", event.id),
+            `/admin/events/${event.id}/checkins`,
             { qr_token: qr_token.trim() },
             {
                 preserveScroll: true,
@@ -38,7 +40,7 @@
 
             <Button
                 variant="outline"
-                href={route("events.checkins.export", event.id)}
+                href={`/admin/events/${event.id}/checkins/export`}
             >
                 Esporta CSV
             </Button>

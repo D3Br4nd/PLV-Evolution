@@ -56,7 +56,7 @@
         let year = date.getFullYear();
         let month = date.getMonth() + 1;
         router.get(
-            route("events.index"),
+            "/admin/events",
             { year, month },
             { preserveState: false },
         );
@@ -142,12 +142,12 @@
         };
 
         if (eventForm.id) {
-            router.put(route("events.update", eventForm.id), data, {
+            router.put(`/admin/events/${eventForm.id}`, data, {
                 onSuccess: closeDialogs,
                 onFinish: () => (loading = false),
             });
         } else {
-            router.post(route("events.store"), data, {
+            router.post("/admin/events", data, {
                 onSuccess: closeDialogs,
                 onFinish: () => (loading = false),
             });
@@ -159,7 +159,7 @@
         if (!confirm("Sei sicuro di voler eliminare questo evento?")) return;
 
         loading = true;
-        router.delete(route("events.destroy", selectedEvent.id), {
+        router.delete(`/admin/events/${selectedEvent.id}`, {
             onSuccess: closeDialogs,
             onFinish: () => (loading = false),
         });
@@ -302,7 +302,7 @@
                     {#if isEditEventOpen && selectedEvent}
                         <Button
                             variant="outline"
-                            href={route("events.checkins.index", selectedEvent.id)}
+                            href={`/admin/events/${selectedEvent.id}/checkins`}
                         >
                             Check-in
                         </Button>

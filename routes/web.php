@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\MemberCardController;
 use App\Http\Controllers\PublicContentPageController;
 use Illuminate\Support\Facades\Route;
@@ -24,9 +26,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin routes (protected)
 Route::middleware(['auth', 'role:super_admin,direzione,segreteria'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Admin/Dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', AdminDashboardController::class)->name('admin.dashboard');
+
+    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::patch('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+    Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('admin.profile.password');
 
     Route::resource('members', \App\Http\Controllers\AdminMemberController::class);
     Route::patch('members/{member}/role', \App\Http\Controllers\AdminMemberRoleController::class.'@update')

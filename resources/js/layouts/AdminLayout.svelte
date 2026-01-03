@@ -24,6 +24,12 @@
     // Get authenticated user from Inertia page props
     let user = $derived($page.props.auth.user);
 
+    // Inertia Svelte exposes `page.url` as a string (e.g. "/admin/dashboard").
+    // Older code assumed a URL object with `.pathname`, which breaks in production.
+    let pathname = $derived(
+        typeof $page.url === "string" ? $page.url : $page.url?.pathname || "",
+    );
+
     // Get user initials for avatar
     function getUserInitials(name) {
         if (!name) return "U";
@@ -52,12 +58,12 @@
 <div class="min-h-screen bg-background text-foreground">
     <!-- Desktop Sidebar -->
     <aside
-        class="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card hidden lg:block"
+        class="fixed left-0 top-0 z-40 h-screen w-72 border-r border-border bg-card hidden lg:block"
     >
         <div class="flex h-full flex-col">
             <!-- Logo/Brand -->
             <div
-                class="flex h-16 items-center gap-3 border-b border-border px-6"
+                class="flex h-14 items-center gap-3 border-b border-border px-6"
             >
                 <img
                     src="/logo.png"
@@ -73,8 +79,8 @@
             <nav class="flex-1 space-y-1 px-3 py-4">
                 {#each navItems as item}
                     {@const active =
-                        $page.url.pathname === item.href ||
-                        ($page.url.pathname.startsWith(item.href + "/") &&
+                        pathname === item.href ||
+                        (pathname.startsWith(item.href + "/") &&
                             item.href !== "/admin/dashboard")}
                     <Link
                         href={item.href}
@@ -92,10 +98,10 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="lg:pl-64">
+    <div class="lg:pl-72">
         <!-- Top Bar -->
         <header
-            class="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background px-4 sm:px-6"
+            class="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background px-4 sm:px-6"
         >
             <!-- Mobile Menu Trigger -->
             <Sheet.Root bind:open={mobileMenuOpen}>
@@ -115,7 +121,7 @@
                 <Sheet.Content side="left" class="p-0">
                     <div class="flex h-full flex-col">
                         <div
-                            class="flex h-16 items-center justify-between border-b border-border px-6"
+                            class="flex h-14 items-center justify-between border-b border-border px-6"
                         >
                             <div class="flex items-center gap-3">
                                 <img
@@ -150,8 +156,8 @@
                         <nav class="flex-1 space-y-1 px-3 py-4">
                             {#each navItems as item}
                                 {@const active =
-                                    $page.url.pathname === item.href ||
-                                    ($page.url.pathname.startsWith(item.href + "/") &&
+                                    pathname === item.href ||
+                                    (pathname.startsWith(item.href + "/") &&
                                         item.href !== "/admin/dashboard")}
                                 <Link
                                     href={item.href}
@@ -169,6 +175,9 @@
                     </div>
                 </Sheet.Content>
             </Sheet.Root>
+
+            <div class="hidden sm:block h-4 w-px bg-border"></div>
+            <h1 class="text-sm font-medium truncate">{title}</h1>
 
             <!-- Spacer -->
             <div class="flex-1"></div>
@@ -194,6 +203,10 @@
                 <DropdownMenu.Content align="end" sideOffset={8} class="w-48">
                     <DropdownMenu.Label>Account</DropdownMenu.Label>
                     <DropdownMenu.Separator />
+                    <DropdownMenu.Item onSelect={() => router.get("/admin/profile")}>
+                        Profilo e password
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator />
                     <DropdownMenu.Item
                         onSelect={() => router.post("/logout")}
                         class="text-destructive data-highlighted:text-destructive"
@@ -206,7 +219,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="p-4 sm:p-6 lg:p-8">
+        <main class="px-4 py-4 sm:px-6 sm:py-6">
             {@render children()}
         </main>
     </div>

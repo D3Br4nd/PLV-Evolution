@@ -56,7 +56,7 @@
 
             // Persist
             router.patch(
-                route("projects.update", draggingId),
+                `/admin/projects/${draggingId}`,
                 {
                     status: status,
                 },
@@ -84,7 +84,7 @@
 
     function createProject() {
         processing = true;
-        router.post(route("projects.store"), newProjectForm, {
+        router.post("/admin/projects", newProjectForm, {
             onSuccess: () => {
                 isNewProjectOpen = false;
                 newProjectForm = {
@@ -189,10 +189,7 @@
                                             onclick={() => {
                                                 if (confirm("Eliminare?"))
                                                     router.delete(
-                                                        route(
-                                                            "projects.destroy",
-                                                            project.id,
-                                                        ),
+                                                        `/admin/projects/${project.id}`,
                                                     );
                                             }}
                                         >

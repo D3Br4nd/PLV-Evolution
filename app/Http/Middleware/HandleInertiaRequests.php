@@ -33,6 +33,11 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'flash' => [
+                // Share actual values (not closures) because the frontend renders them directly.
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
             'auth' => [
                 'user' => $user,
                 'can' => [
