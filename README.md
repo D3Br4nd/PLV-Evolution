@@ -90,12 +90,11 @@ Compila gli asset e avvia i container:
 # Rete Docker condivisa (Nginx Proxy Manager, ecc.)
 docker network create plv_network || true
 
-# Build degli asset frontend
-docker run --rm -v $(pwd):/app -w /app node:24-alpine npm run build
-
 # Avvia lo stack
 docker compose up -d --build
 ```
+
+> Nota: in produzione **non** serve il container `vite`. È disponibile solo per sviluppo con `--profile dev`.
 
 ### 4. Database Setup (Migrazioni e Seeders)
 
@@ -118,6 +117,12 @@ docker compose exec app php artisan migrate:fresh --seed
 ## 🔧 Comandi Utili per lo Sviluppo
 
 ```bash
+# Avvio in modalità sviluppo (mount del codice PHP + assets via Vite)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+
+# Avviare Vite (solo sviluppo/HMR)
+docker compose --profile dev up -d vite
+
 # Logs in tempo reale
 docker compose logs -f
 

@@ -3,7 +3,7 @@ services:
         image: alpine:latest
         container_name: plv_saas_init
         command: >
-            sh -c "mkdir -p /data/pgsql /data/redis &&
+            sh -c "mkdir -p /data/pgsql /data/redis /data/storage/app/public /data/storage/framework/cache /data/storage/framework/sessions /data/storage/framework/views /data/storage/logs &&
                    chmod -R 777 /data"
         volumes:
             - ./docker:/data
@@ -20,7 +20,8 @@ services:
         # ports:
         #     - "${APP_PORT:-8000}:8000" # enable only if you want to expose to host
         volumes:
-            - '.:/app'
+            # Persist Laravel storage (uploads, cache, logs)
+            - './docker/storage:/app/storage'
         env_file:
             - .env
         environment:
@@ -89,7 +90,7 @@ services:
             REVERB_PORT: 8080
             REVERB_SCHEME: "http"
         volumes:
-            - '.:/app'
+            - './docker/storage:/app/storage'
         networks:
             - plv_network
         depends_on:
@@ -97,10 +98,17 @@ services:
                 condition: service_completed_successfully
             redis:
                 condition: service_healthy
+        healthcheck:
+            # Escape "$" as "$$" to avoid Docker Compose env interpolation.
+            test: ["CMD-SHELL", "php -r '$$fp=@fsockopen(\"127.0.0.1\",8080); if($$fp){fclose($$fp); exit(0);} exit(1);'"]
+            interval: 10s
+            timeout: 3s
+            retries: 10
     
     vite:
         image: 'node:24.12.0'
         container_name: plv_saas_vite
+        profiles: ["dev"]
         working_dir: /app
         command: sh -c "npm install && npm run dev"
         restart: unless-stopped
@@ -112,6 +120,14 @@ services:
             - plv_network
         environment:
             VITE_HOST: '0.0.0.0'
+            # HMR is enabled only when VITE_HMR_HOST is set (see vite.config.js).
+            # Override these in your .env when running behind a reverse proxy:
+            #   VITE_HMR_HOST=viteevo.prolocoventicano.com
+            #   VITE_HMR_PROTOCOL=wss
+            #   VITE_HMR_CLIENT_PORT=443
+            VITE_HMR_HOST: ${VITE_HMR_HOST:-}
+            VITE_HMR_PROTOCOL: ${VITE_HMR_PROTOCOL:-ws}
+            VITE_HMR_CLIENT_PORT: ${VITE_HMR_CLIENT_PORT:-5173}
 
 networks:
     plv_network:
