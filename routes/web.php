@@ -1,12 +1,19 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MemberCardController;
+use App\Http\Controllers\PublicContentPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+
+Route::middleware('auth')->get('/me/card', [MemberCardController::class, 'show'])->name('member.card');
+
+// Public content pages (published)
+Route::get('/p/{slug}', [PublicContentPageController::class, 'show'])->name('public.page');
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -16,12 +23,23 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin routes (protected)
-Route::middleware('auth')->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:super_admin,direzione,segreteria'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Admin/Dashboard');
     })->name('admin.dashboard');
 
     Route::resource('members', \App\Http\Controllers\AdminMemberController::class);
+    Route::patch('members/{member}/role', \App\Http\Controllers\AdminMemberRoleController::class.'@update')
+        ->name('members.role.update')
+        ->middleware('role:super_admin');
     Route::resource('events', \App\Http\Controllers\AdminEventController::class);
+    Route::get('events/{event}/checkins', [\App\Http\Controllers\AdminEventCheckinController::class, 'index'])
+        ->name('events.checkins.index');
+    Route::post('events/{event}/checkins', [\App\Http\Controllers\AdminEventCheckinController::class, 'store'])
+        ->name('events.checkins.store');
+    Route::get('events/{event}/checkins/export', [\App\Http\Controllers\AdminEventCheckinController::class, 'exportCsv'])
+        ->name('events.checkins.export');
     Route::resource('projects', \App\Http\Controllers\AdminProjectController::class);
+    Route::resource('content-pages', \App\Http\Controllers\AdminContentPageController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 });

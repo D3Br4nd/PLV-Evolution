@@ -8,6 +8,7 @@ use App\Models\Membership;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use App\Enums\UserRole;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Massimiliano Admin',
             'email' => 'admin@prolocoventicanese.it',
             'password' => 'password', // Will be hashed by model cast
-            'role' => 'admin',
+            'role' => UserRole::SuperAdmin->value,
             'membership_status' => 'active',
         ]);
 
@@ -30,7 +31,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Mario Rossi',
             'email' => 'mario.rossi@example.com',
             'password' => 'password',
-            'role' => 'member',
+            'role' => UserRole::Member->value,
             'membership_status' => 'active',
         ]);
         

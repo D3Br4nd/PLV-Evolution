@@ -19,6 +19,9 @@ export default defineConfig({
                 name: 'Pro Loco Venticanese',
                 short_name: 'PLV Evolution',
                 description: 'L\'evoluzione della tradizione.',
+                start_url: '/',
+                scope: '/',
+                display: 'standalone',
                 theme_color: '#000000',
                 icons: [
                     {
@@ -32,7 +35,11 @@ export default defineConfig({
                         type: 'image/png'
                     }
                 ]
-            }
+            },
+            workbox: {
+                navigateFallback: '/',
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+            },
         })
     ],
     server: {

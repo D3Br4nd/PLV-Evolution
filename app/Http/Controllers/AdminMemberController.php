@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +16,10 @@ class AdminMemberController extends Controller
      */
     public function index(Request $request)
     {
+        $year = (int) $request->input('year', now()->year);
+
         $query = User::query()
-            ->with(['memberships' => fn($q) => $q->where('year', 2025)])
+            ->with(['memberships' => fn($q) => $q->where('year', $year)])
             ->latest();
 
         if ($request->has('search')) {
@@ -30,6 +33,7 @@ class AdminMemberController extends Controller
         return Inertia::render('Admin/Members/Index', [
             'users' => $query->paginate(20)->withQueryString(),
             'filters' => $request->only(['search']),
+            'year' => $year,
         ]);
     }
 
@@ -41,8 +45,12 @@ class AdminMemberController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'role' => 'required|string|in:admin,member',
+            'role' => 'required|string|in:super_admin,direzione,segreteria,member',
         ]);
+
+        if ($validated['role'] !== UserRole::Member->value) {
+            $this->authorize('manage-roles');
+        }
 
         User::create([
             'name' => $validated['name'],
@@ -63,8 +71,12 @@ class AdminMemberController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($member->id)],
-            'role' => 'required|string|in:admin,member',
+            'role' => 'required|string|in:super_admin,direzione,segreteria,member',
         ]);
+
+        if ($validated['role'] !== $member->role) {
+            $this->authorize('manage-roles');
+        }
 
         $member->update($validated);
 

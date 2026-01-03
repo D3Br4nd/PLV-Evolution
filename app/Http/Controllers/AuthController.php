@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/admin/dashboard');
+            $user = $request->user();
+            $isAdmin = in_array($user->role, ['super_admin', 'direzione', 'segreteria'], true);
+
+            return $isAdmin
+                ? redirect()->intended('/admin/dashboard')
+                : redirect()->intended('/me/card');
         }
 
         throw ValidationException::withMessages([
@@ -63,13 +69,13 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'member',
+            'role' => UserRole::Member->value,
             'membership_status' => 'pending',
         ]);
 
         Auth::login($user);
 
-        return redirect('/admin/dashboard');
+        return redirect('/me/card');
     }
 
     /**

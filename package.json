@@ -11,6 +11,7 @@
         "@tailwindcss/vite": "^4.1.18",
         "laravel-vite-plugin": "^2.0.1",
         "lucide-svelte": "^0.562.0",
+        "qrcode": "^1.5.4",
         "svelte": "^5.46.1",
         "tailwindcss": "^4.1.18",
         "vite": "^7.3.0",

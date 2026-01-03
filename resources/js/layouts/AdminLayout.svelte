@@ -36,6 +36,7 @@
         { href: "/admin/members", label: "Soci", icon: Users },
         { href: "/admin/events", label: "Eventi", icon: Calendar },
         { href: "/admin/projects", label: "Progetti", icon: Kanban },
+        { href: "/admin/content-pages", label: "Contenuti", icon: Home },
     ];
     // State for user menu
     let userMenuOpen = $state(false);

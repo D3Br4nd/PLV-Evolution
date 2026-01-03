@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role')->default('member'); // admin, member
+            $table->string('role')->default('member'); // super_admin, direzione, segreteria, member
             $table->string('membership_status')->default('inactive'); // active, inactive, pending
             $table->rememberToken();
             $table->timestamps();

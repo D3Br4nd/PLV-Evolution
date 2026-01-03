@@ -24,4 +24,9 @@ class Membership extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function checkins()
+    {
+        return $this->hasMany(EventCheckin::class);
+    }
 }

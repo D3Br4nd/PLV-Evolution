@@ -26,4 +26,9 @@ class Event extends Model
             'metadata' => 'array',
         ];
     }
+
+    public function checkins()
+    {
+        return $this->hasMany(EventCheckin::class);
+    }
 }

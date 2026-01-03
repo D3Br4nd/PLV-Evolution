@@ -348,6 +348,14 @@
                         <div></div>
                     {/if}
                     <div class="flex space-x-2">
+                        {#if isEditEventOpen && selectedEvent}
+                            <a
+                                class="px-4 py-2 text-sm text-zinc-300 hover:text-white underline"
+                                href={route("events.checkins.index", selectedEvent.id)}
+                            >
+                                Check-in
+                            </a>
+                        {/if}
                         <button
                             onclick={closeDialogs}
                             class="px-4 py-2 text-sm text-zinc-400 hover:text-white"

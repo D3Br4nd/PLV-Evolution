@@ -1,6 +1,7 @@
 import { createInertiaApp } from '@inertiajs/svelte'
 import { mount } from 'svelte'
 import '../css/app.css';
+import { registerSW } from 'virtual:pwa-register';
 
 createInertiaApp({
     resolve: name => {
@@ -11,3 +12,6 @@ createInertiaApp({
         mount(App, { target: el, props })
     },
 })
+
+// PWA (dev-friendly) SW registration
+registerSW({ immediate: true });

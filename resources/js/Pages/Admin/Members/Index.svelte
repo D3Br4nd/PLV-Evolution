@@ -3,12 +3,18 @@
     import AdminLayout from "@/layouts/AdminLayout.svelte";
     import { page } from "@inertiajs/svelte";
 
-    let { users, filters, flash } = $props();
+    let { users, flash } = $props();
+    let canManageRoles = $derived($page.props.auth?.can?.manageRoles);
 
-    let search = $state(filters.search || "");
+    let search = $state("");
     let isNewMemberOpen = $state(false);
     let deleteConfirmationUserId = $state(null);
     let processing = $state(false);
+
+    // Keep local search input in sync with server-provided filters (Inertia reactive props).
+    $effect(() => {
+        search = $page.props?.filters?.search || "";
+    });
 
     // Debounce search
     let timer;
@@ -70,6 +76,14 @@
                 processing = false;
             },
         });
+    }
+
+    function updateUserRole(userId, role) {
+        router.patch(
+            route("members.role.update", userId),
+            { role },
+            { preserveScroll: true, preserveState: true },
+        );
     }
 </script>
 
@@ -153,7 +167,27 @@
                                     {/if}
                                 </td>
                                 <td class="px-6 py-4 text-zinc-300 capitalize">
-                                    {user.role}
+                                    {#if canManageRoles}
+                                        <select
+                                            value={user.role}
+                                            onchange={(e) =>
+                                                updateUserRole(user.id, e.currentTarget.value)}
+                                            class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-white focus:outline-none focus:border-white capitalize"
+                                        >
+                                            <option value="super_admin">
+                                                SuperAdmin
+                                            </option>
+                                            <option value="direzione">
+                                                Direzione
+                                            </option>
+                                            <option value="segreteria">
+                                                Segreteria
+                                            </option>
+                                            <option value="member">Socio</option>
+                                        </select>
+                                    {:else}
+                                        {user.role}
+                                    {/if}
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
                                     <button
@@ -221,7 +255,7 @@
                 class="px-6 py-4 border-t border-zinc-800 flex items-center justify-between"
             >
                 <div class="text-xs text-muted-foreground">
-                    Menbri {users.from || 0} - {users.to || 0} di {users.total}
+                    Membri {users.from || 0} - {users.to || 0} di {users.total}
                 </div>
                 <div class="space-x-1">
                     {#each users.links as link}
@@ -284,13 +318,23 @@
                         <label class="block">
                             <span class="text-xs text-zinc-400 mb-1">Ruolo</span
                             >
-                            <select
-                                bind:value={newMemberForm.role}
-                                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-white focus:outline-none focus:border-white"
-                            >
-                                <option value="member">User</option>
-                                <option value="admin">Admin</option>
-                            </select>
+                            {#if canManageRoles}
+                                <select
+                                    bind:value={newMemberForm.role}
+                                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-white focus:outline-none focus:border-white"
+                                >
+                                    <option value="member">Socio</option>
+                                    <option value="segreteria">Segreteria</option>
+                                    <option value="direzione">Direzione</option>
+                                    <option value="super_admin">SuperAdmin</option>
+                                </select>
+                            {:else}
+                                <input
+                                    value="Socio"
+                                    disabled
+                                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-400"
+                                />
+                            {/if}
                         </label>
                     </div>
                 </div>

@@ -33,10 +33,42 @@ git clone <repository-url> plv_saas
 cd plv_saas
 ```
 
-Crea il file `.env`:
+Crea il file `.env` (esempio minimo):
 
 ```bash
-cp .env.example .env
+cat > .env <<'EOF'
+APP_NAME="Pro Loco Venticanese"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+FORCE_HTTPS=false
+
+APP_KEY=
+
+DB_CONNECTION=pgsql
+DB_HOST=db
+DB_PORT=5432
+DB_DATABASE=plv_saas
+DB_USERNAME=sail
+DB_PASSWORD=password
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+REVERB_APP_ID=plv
+REVERB_APP_KEY=plv-key
+REVERB_APP_SECRET=plv-secret
+REVERB_HOST=reverb
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+APP_PORT=8000
+DB_PORT_FORWARD=5432
+REDIS_PORT_FORWARD=6379
+REVERB_PORT_FORWARD=8080
+VITE_PORT_FORWARD=5173
+DOCKER_NETWORK_DRIVER=bridge
+EOF
 ```
 
 ### 2. Installazione Dipendenze
@@ -77,6 +109,7 @@ docker compose exec app php artisan migrate:fresh --seed
 
 - **Web App**: [http://localhost:8000](http://localhost:8000)
 - **Admin Login**: `admin@prolocoventicanese.it` / `password`
+- **Tessera socio (PWA)**: dopo login come socio → `/me/card`
 
 ---
 
