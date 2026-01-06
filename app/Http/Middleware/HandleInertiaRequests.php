@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
+                'phone' => $user->phone,
                 'role' => $user->role,
                 'plv_role' => $user->plv_role,
                 'must_set_password' => (bool) $user->must_set_password,

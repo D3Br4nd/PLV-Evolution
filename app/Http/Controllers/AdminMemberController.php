@@ -16,6 +16,7 @@ use App\Models\MemberInvitation;
 use App\Mail\MemberInvitationMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class AdminMemberController extends Controller
 {
@@ -186,6 +187,16 @@ class AdminMemberController extends Controller
             'token_hash' => hash('sha256', $token),
             'expires_at' => now()->addDays(7),
         ]);
+
+        // Create storage directories for the user
+        $disk = Storage::disk('public');
+        $userDir = $member->id; // UUID
+        if (!$disk->exists($userDir . '/avatar')) {
+            $disk->makeDirectory($userDir . '/avatar');
+        }
+        if (!$disk->exists($userDir . '/documents')) {
+            $disk->makeDirectory($userDir . '/documents');
+        }
 
         $mailSent = false;
         try {
