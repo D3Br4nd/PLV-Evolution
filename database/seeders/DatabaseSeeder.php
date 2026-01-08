@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,11 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Keep production clean by default.
-        // Seed demo data only when explicitly enabled:
-        //   PLV_DEMO_SEED=true php artisan db:seed
-        if (env('PLV_DEMO_SEED', false)) {
-            $this->call(DemoSeeder::class);
-        }
+        // Create super admin from environment variables
+        User::updateOrCreate(
+            ['email' => env('SUPER_ADMIN_EMAIL', 'admin@prolocoventicanese.it')],
+            [
+                'name' => env('SUPER_ADMIN_NAME', 'Admin'),
+                'password' => env('SUPER_ADMIN_PASSWORD', 'password'),
+                'role' => UserRole::SuperAdmin->value,
+                'membership_status' => 'active',
+            ]
+        );
     }
 }

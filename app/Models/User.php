@@ -105,4 +105,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(MemberInvitation::class);
     }
+
+    /**
+     * Get the committees associated with the user.
+     */
+    public function committees()
+    {
+        return $this->belongsToMany(Committee::class, 'committee_user')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
+    }
 }

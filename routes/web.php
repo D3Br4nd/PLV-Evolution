@@ -137,6 +137,18 @@ Route::middleware(['auth', 'role:super_admin,admin'])->prefix('admin')->group(fu
     Route::get('events/{event}/checkins/export', [\App\Http\Controllers\AdminEventCheckinController::class, 'exportCsv'])
         ->name('events.checkins.export');
     Route::resource('projects', \App\Http\Controllers\AdminProjectController::class);
+    
+    // Committees
+    Route::resource('committees', \App\Http\Controllers\AdminCommitteeController::class);
+    Route::post('committees/{committee}/members', [\App\Http\Controllers\AdminCommitteeController::class, 'attachMember'])
+        ->name('committees.members.attach');
+    Route::delete('committees/{committee}/members/{user}', [\App\Http\Controllers\AdminCommitteeController::class, 'detachMember'])
+        ->name('committees.members.detach');
+    Route::post('committees/{committee}/posts', [\App\Http\Controllers\AdminCommitteeController::class, 'storePost'])
+        ->name('committees.posts.store');
+    Route::delete('committees/{committee}/posts/{post}', [\App\Http\Controllers\AdminCommitteeController::class, 'destroyPost'])
+        ->name('committees.posts.destroy');
+    
     Route::resource('content-pages', \App\Http\Controllers\AdminContentPageController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 });

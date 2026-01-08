@@ -9,6 +9,8 @@
 	import NavMain from "./nav-main.svelte";
 	import NavUser from "./nav-user.svelte";
 	import * as Sidebar from "@/lib/components/ui/sidebar/index.js";
+	import { sidebarMenuButtonVariants } from "@/lib/components/ui/sidebar/sidebar-menu-button.svelte";
+	import { cn } from "@/lib/utils.js";
 	import { page } from "@inertiajs/svelte";
 
 	const data = {
@@ -25,6 +27,11 @@
 				icon: UsersIcon,
 			},
 			{
+				title: "Comitati",
+				url: "/admin/committees",
+				icon: UsersIcon,
+			},
+			{
 				title: "Eventi",
 				url: "/admin/events",
 				icon: CalendarIcon,
@@ -34,14 +41,13 @@
 				url: "/admin/projects",
 				icon: FolderIcon,
 			},
-		],
-		documents: [
 			{
-				name: "Contenuti",
+				title: "Contenuti",
 				url: "/admin/content-pages",
 				icon: FileDescriptionIcon,
 			},
 		],
+		documents: [],
 	};
 
 	let { ...restProps } = $props();
@@ -53,32 +59,34 @@
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton
-					size="lg"
-					class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+				<a
+					href="/admin/dashboard"
+					class={cn(
+						sidebarMenuButtonVariants({
+							size: "lg",
+							variant: "default",
+						}),
+						"data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+					)}
+					data-sidebar="menu-button"
+					data-size="lg"
 				>
-					{#snippet child({ props })}
-						<a href="/admin/dashboard" {...props}>
-							<div
-								class="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden"
-							>
-								<img
-									src="/logo.png"
-									alt="Pro Loco Logo"
-									class="size-full object-cover"
-								/>
-							</div>
-							<div
-								class="grid flex-1 text-left text-sm leading-tight"
-							>
-								<span class="truncate font-semibold"
-									>Pro Loco Venticanese</span
-								>
-								<span class="truncate text-xs">Evolution</span>
-							</div>
-						</a>
-					{/snippet}
-				</Sidebar.MenuButton>
+					<div
+						class="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden"
+					>
+						<img
+							src="/logo.png"
+							alt="Pro Loco Logo"
+							class="size-full object-cover"
+						/>
+					</div>
+					<div class="grid flex-1 text-left text-sm leading-tight">
+						<span class="truncate font-semibold"
+							>Pro Loco Venticanese</span
+						>
+						<span class="truncate text-xs">Evolution</span>
+					</div>
+				</a>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.Header>

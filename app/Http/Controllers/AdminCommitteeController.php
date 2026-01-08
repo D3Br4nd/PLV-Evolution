@@ -1,0 +1,190 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Committee;
+use App\Models\CommitteePost;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class AdminCommitteeController extends Controller
+{
+    /**
+     * Display a listing of committees.
+     */
+    public function index()
+    {
+        $committees = Committee::withCount('members', 'posts')
+            ->with('creator:id,name')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Admin/Committees/Index', [
+            'committees' => $committees,
+        ]);
+    }
+
+    /**
+     * Store a newly created committee.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'nullable|in:active,inactive',
+        ]);
+
+        $committee = Committee::create([
+            ...$validated,
+            'status' => $validated['status'] ?? 'active',
+            'created_by_user_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('committees.show', $committee->id)
+            ->with('flash', [
+                'type' => 'success',
+                'message' => 'Comitato creato con successo.',
+            ]);
+    }
+
+    /**
+     * Display the specified committee.
+     */
+    public function show(string $id)
+    {
+        $committee = Committee::with([
+            'members' => function ($query) {
+                $query->select('users.id', 'users.name', 'users.email', 'users.avatar_path')
+                    ->orderBy('committee_user.joined_at', 'desc');
+            },
+            'posts.author:id,name,avatar_path',
+        ])->findOrFail($id);
+
+        // Get all members for the "add member" dropdown, excluding already attached members
+        $availableMembers = User::whereNotIn('id', $committee->members->pluck('id'))
+            ->where('membership_status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
+        return Inertia::render('Admin/Committees/Show', [
+            'committee' => $committee,
+            'availableMembers' => $availableMembers,
+        ]);
+    }
+
+    /**
+     * Update the specified committee.
+     */
+    public function update(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'nullable|in:active,inactive',
+        ]);
+
+        $committee = Committee::findOrFail($id);
+        $committee->update($validated);
+
+        return back()->with('flash', [
+            'type' => 'success',
+            'message' => 'Comitato aggiornato con successo.',
+        ]);
+    }
+
+    /**
+     * Remove the specified committee.
+     */
+    public function destroy(string $id)
+    {
+        $committee = Committee::findOrFail($id);
+        $committee->delete();
+
+        return redirect()->route('committees.index')
+            ->with('flash', [
+                'type' => 'success',
+                'message' => 'Comitato eliminato con successo.',
+            ]);
+    }
+
+    /**
+     * Attach a member to a committee.
+     */
+    public function attachMember(Request $request, string $committeeId)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'role' => 'nullable|string|max:255',
+        ]);
+
+        $committee = Committee::findOrFail($committeeId);
+
+        $committee->members()->attach($validated['user_id'], [
+            'role' => $validated['role'] ?? null,
+            'joined_at' => now(),
+        ]);
+
+        return back()->with('flash', [
+            'type' => 'success',
+            'message' => 'Socio aggiunto al comitato.',
+        ]);
+    }
+
+    /**
+     * Detach a member from a committee.
+     */
+    public function detachMember(string $committeeId, string $userId)
+    {
+        $committee = Committee::findOrFail($committeeId);
+        $committee->members()->detach($userId);
+
+        return back()->with('flash', [
+            'type' => 'success',
+            'message' => 'Socio rimosso dal comitato.',
+        ]);
+    }
+
+    /**
+     * Store a new post in a committee (admin only).
+     */
+    public function storePost(Request $request, string $committeeId)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+
+        $committee = Committee::findOrFail($committeeId);
+
+        CommitteePost::create([
+            'committee_id' => $committee->id,
+            'author_id' => auth()->id(),
+            'title' => $validated['title'],
+            'content' => $validated['content'],
+        ]);
+
+        return back()->with('flash', [
+            'type' => 'success',
+            'message' => 'Post pubblicato nella bacheca.',
+        ]);
+    }
+
+    /**
+     * Remove a post from a committee (admin only).
+     */
+    public function destroyPost(string $committeeId, string $postId)
+    {
+        $post = CommitteePost::where('committee_id', $committeeId)
+            ->where('id', $postId)
+            ->firstOrFail();
+
+        $post->delete();
+
+        return back()->with('flash', [
+            'type' => 'success',
+            'message' => 'Post eliminato dalla bacheca.',
+        ]);
+    }
+}
