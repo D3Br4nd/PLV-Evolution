@@ -5,6 +5,7 @@
 	import UsersIcon from "@tabler/icons-svelte/icons/users";
 	import CalendarIcon from "@tabler/icons-svelte/icons/calendar";
 	import FileDescriptionIcon from "@tabler/icons-svelte/icons/file-description";
+	import BellIcon from "@tabler/icons-svelte/icons/bell";
 	import NavDocuments from "./nav-documents.svelte";
 	import NavMain from "./nav-main.svelte";
 	import NavUser from "./nav-user.svelte";
@@ -45,6 +46,11 @@
 				title: "Contenuti",
 				url: "/admin/content-pages",
 				icon: FileDescriptionIcon,
+			},
+			{
+				title: "Notifiche Broadcast",
+				url: "/admin/broadcasts",
+				icon: BellIcon,
 			},
 		],
 		documents: [],

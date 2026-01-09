@@ -79,6 +79,10 @@ Route::middleware('auth')->prefix('me/committees')->group(function () {
     Route::post('/posts/{post}/read', [\App\Http\Controllers\MemberCommitteeController::class, 'markAsRead'])->name('member.committees.posts.mark-as-read');
 });
 
+// Broadcasts (PWA)
+Route::middleware('auth')->get('/me/broadcasts/{broadcast}', [\App\Http\Controllers\MemberBroadcastController::class, 'show'])
+    ->name('member.broadcasts.show');
+
 // One-time invitation link (public)
 Route::get('/invite/{token}', [MemberInvitationAcceptController::class, 'show'])->name('invite.accept');
 Route::post('/invite/{token}', [MemberInvitationAcceptController::class, 'store'])->name('invite.store');
@@ -162,4 +166,8 @@ Route::middleware(['auth', 'role:super_admin,admin'])->prefix('admin')->group(fu
     
     Route::resource('content-pages', \App\Http\Controllers\AdminContentPageController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+    
+    // Broadcast Notifications
+    Route::resource('broadcasts', \App\Http\Controllers\AdminBroadcastController::class)
+        ->only(['index', 'create', 'store', 'show', 'destroy']);
 });

@@ -203,6 +203,19 @@ return new class extends Migration
             $table->index(['status', 'published_at']);
         });
 
+        // Broadcast Notifications (Admin to all active members)
+        Schema::create('broadcast_notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('title');
+            $table->text('content');                     // HTML formatted (from Tiptap)
+            $table->string('featured_image_path')->nullable();
+            $table->string('attachment_path')->nullable();
+            $table->string('attachment_name')->nullable(); // Original filename
+            $table->foreignUuid('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('sent_at')->nullable();     // When notifications were sent
+            $table->timestamps();
+        });
+
         // Notifications
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
@@ -231,6 +244,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('push_subscriptions');
+        Schema::dropIfExists('broadcast_notifications');
         Schema::dropIfExists('committee_post_read');
         Schema::dropIfExists('notifications');
         Schema::dropIfExists('content_pages');
