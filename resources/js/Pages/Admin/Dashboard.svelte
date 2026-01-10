@@ -4,7 +4,7 @@
     import { router } from "@inertiajs/svelte";
     import * as Card from "@/lib/components/ui/card";
     import * as Table from "@/lib/components/ui/table";
-    let { stats, activity } = $props();
+    let { stats, activity, recentActivity } = $props();
 
     function go(url) {
         if (!url) return;
@@ -32,7 +32,7 @@
             {/snippet}
         </div>
 
-        <!-- Stats Grid -->
+        <!-- Row 1: Main Stats (4 columns) -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card.Root>
                 <Card.Header
@@ -62,7 +62,7 @@
                 >
                     <Card.Title
                         class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
-                        >Eventi</Card.Title
+                        >Eventi ({new Date().getFullYear()})</Card.Title
                     >
                 </Card.Header>
                 <Card.Content>
@@ -77,7 +77,52 @@
                 </Card.Content>
             </Card.Root>
 
-            <Card.Root class="lg:col-span-1">
+            <Card.Root>
+                <Card.Header
+                    class="flex flex-row items-center justify-between space-y-0 pb-2"
+                >
+                    <Card.Title
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                        >Progetti</Card.Title
+                    >
+                </Card.Header>
+                <Card.Content>
+                    <div class="text-3xl font-bold tracking-tight">
+                        {stats?.projectsTotal ?? 0}
+                    </div>
+                    <div class="mt-2 flex items-center gap-2 text-[10px] font-medium">
+                        <span class="text-muted-foreground">Da fare: <span class="text-foreground">{stats?.projectsTodo ?? 0}</span></span>
+                        <span class="text-muted-foreground">•</span>
+                        <span class="text-blue-600">In corso: {stats?.projectsInProgress ?? 0}</span>
+                        <span class="text-muted-foreground">•</span>
+                        <span class="text-emerald-600">Fatti: {stats?.projectsDone ?? 0}</span>
+                    </div>
+                </Card.Content>
+            </Card.Root>
+
+            <Card.Root>
+                <Card.Header
+                    class="flex flex-row items-center justify-between space-y-0 pb-2"
+                >
+                    <Card.Title
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                        >Contenuti</Card.Title
+                    >
+                </Card.Header>
+                <Card.Content>
+                    <div class="text-3xl font-bold tracking-tight">
+                        {stats?.contentPagesTotal ?? 0}
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1">
+                        Pagine pubblicate
+                    </p>
+                </Card.Content>
+            </Card.Root>
+        </div>
+
+        <!-- Row 2: Committees & Notifications (2 columns) -->
+        <div class="grid gap-4 md:grid-cols-2">
+            <Card.Root>
                 <Card.Header
                     class="flex flex-row items-center justify-between space-y-0 pb-2"
                 >
@@ -89,29 +134,24 @@
                 <Card.Content class="pb-3 pt-1">
                     <div class="space-y-3">
                         {#if stats?.committeeStats?.length}
-                            {#each stats.committeeStats.slice(0, 3) as comm}
+                            {#each stats.committeeStats as comm}
                                 <div class="space-y-1">
-                                    <div
+                    <div
                                         class="flex items-center justify-between text-xs"
                                     >
                                         <span class="truncate font-medium"
                                             >{comm.name}</span
                                         >
-                                        <span class="text-muted-foreground"
-                                            >{comm.count}</span
+                                        <span class="text-muted-foreground shrink-0 ml-2"
+                                            >{comm.count}/{comm.total} ({comm.percentage}%)</span
                                         >
                                     </div>
                                     <div
-                                        class="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+                                        class="h-2 w-full overflow-hidden rounded-full bg-muted"
                                     >
                                         <div
-                                            class="h-full bg-primary transition-all"
-                                            style="width: {Math.min(
-                                                100,
-                                                (comm.count /
-                                                    (stats.membersTotal || 1)) *
-                                                    100,
-                                            )}%"
+                                            class="h-full transition-all"
+                                            style="width: {comm.percentage}%; background-color: {comm.color}"
                                         ></div>
                                     </div>
                                 </div>
@@ -168,6 +208,50 @@
                 </Card.Content>
             </Card.Root>
         </div>
+
+        <!-- Row 3: Visual Activity Overview -->
+        <Card.Root>
+            <Card.Header>
+                <Card.Title class="text-base">Panoramica Attività</Card.Title>
+                <Card.Description>Distribuzione delle azioni negli ultimi 7 giorni</Card.Description>
+            </Card.Header>
+            <Card.Content>
+                {#if recentActivity?.length}
+                    {@const last7Days = Array.from({length: 7}, (_, i) => {
+                        const d = new Date();
+                        d.setDate(d.getDate() - (6 - i));
+                        return d;
+                    })}
+                    {@const activityByDay = last7Days.map(day => {
+                        const dayStr = day.toISOString().split('T')[0];
+                        const count = recentActivity.filter(a => a.created_at.startsWith(dayStr)).length;
+                        return { day, count };
+                    })}
+                    {@const maxCount = Math.max(...activityByDay.map(d => d.count), 1)}
+                    
+                    <div class="flex items-end justify-between gap-2 h-32">
+                        {#each activityByDay as {day, count}}
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <div class="relative w-full bg-muted/30 rounded-t-lg border border-muted flex-1 flex items-end">
+                                    <div 
+                                        class="w-full bg-gradient-to-t from-primary/80 to-primary/40 rounded-t-lg transition-all hover:opacity-80"
+                                        style="height: {count > 0 ? (count / maxCount) * 100 : 2}%"
+                                        title="{count} attività"
+                                    ></div>
+                                </div>
+                                <span class="text-[10px] text-muted-foreground font-medium">
+                                    {day.toLocaleDateString('it-IT', { weekday: 'short' })}
+                                </span>
+                            </div>
+                        {/each}
+                    </div>
+                {:else}
+                    <div class="h-32 flex items-center justify-center text-sm text-muted-foreground">
+                        Nessuna attività recente da visualizzare
+                    </div>
+                {/if}
+            </Card.Content>
+        </Card.Root>
 
         <Card.Root>
             <Card.Header class="pb-3">
