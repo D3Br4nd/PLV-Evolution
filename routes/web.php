@@ -155,8 +155,14 @@ Route::middleware(['auth', 'role:super_admin,admin'])->prefix('admin')->group(fu
         ->name('committees.members.attach');
     Route::delete('committees/{committee}/members/{user}', [\App\Http\Controllers\AdminCommitteeController::class, 'detachMember'])
         ->name('committees.members.detach');
+    Route::get('committees/{committee}/posts/create', [\App\Http\Controllers\AdminCommitteeController::class, 'createPost'])
+        ->name('committees.posts.create');
     Route::post('committees/{committee}/posts', [\App\Http\Controllers\AdminCommitteeController::class, 'storePost'])
         ->name('committees.posts.store');
+    Route::get('committees/{committee}/posts/{post}/edit', [\App\Http\Controllers\AdminCommitteeController::class, 'editPost'])
+        ->name('committees.posts.edit');
+    Route::post('committees/{committee}/posts/{post}', [\App\Http\Controllers\AdminCommitteeController::class, 'updatePost'])
+        ->name('committees.posts.update');
     Route::delete('committees/{committee}/posts/{post}', [\App\Http\Controllers\AdminCommitteeController::class, 'destroyPost'])
         ->name('committees.posts.destroy');
     Route::post('committees/{committee}/image', [\App\Http\Controllers\AdminCommitteeController::class, 'updateCommitteeImage'])

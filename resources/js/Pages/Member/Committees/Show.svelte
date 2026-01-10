@@ -14,6 +14,7 @@
         Info,
         Clock,
         CheckCircle2,
+        Download,
     } from "lucide-svelte";
     import { router } from "@inertiajs/svelte";
     import { formatDistanceToNow } from "date-fns";
@@ -98,14 +99,14 @@
                         </p>
                     </div>
                 {:else}
-                    <div class="space-y-4">
+                    <div class="space-y-2">
                         {#each committee.posts as post}
                             <Card.Root
                                 class={!post.is_read
                                     ? "border-primary ring-1 ring-primary/20 bg-primary/5"
                                     : ""}
                             >
-                                <Card.Header class="p-4 pb-2">
+                                <Card.Header class="p-3 pb-2">
                                     <div
                                         class="flex items-center justify-between"
                                     >
@@ -151,21 +152,48 @@
                                             />
                                         {/if}
                                     </div>
-                                    <Card.Title class="text-base mt-3"
+                                    <Card.Title class="text-sm mt-2"
                                         >{post.title}</Card.Title
                                     >
                                 </Card.Header>
-                                <Card.Content
-                                    class="p-4 pt-0 text-sm leading-relaxed"
-                                >
-                                    {post.content}
+                                <Card.Content class="p-3 pt-0 space-y-3">
+                                    <div
+                                        class="prose prose-sm max-w-none text-xs dark:prose-invert line-clamp-3"
+                                    >
+                                        {@html post.content}
+                                    </div>
+
+                                    {#if post.featured_image_url}
+                                        <div class="-mx-3">
+                                            <img
+                                                src={post.featured_image_url}
+                                                alt="Immagine post"
+                                                class="w-full object-cover border-y max-h-48"
+                                            />
+                                        </div>
+                                    {/if}
+
+                                    {#if post.attachment_url}
+                                        <div>
+                                            <a
+                                                href={post.attachment_url}
+                                                target="_blank"
+                                                download={post.attachment_name}
+                                                class="flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                                            >
+                                                <Download class="size-4" />
+                                                <span class="truncate"
+                                                    >{post.attachment_name ||
+                                                        "Scarica allegato"}</span
+                                                >
+                                            </a>
+                                        </div>
+                                    {/if}
                                 </Card.Content>
                                 {#if !post.is_read}
-                                    <Card.Footer
-                                        class="p-2 border-t bg-primary/5"
-                                    >
+                                    <div class="px-3 pb-3 pt-0">
                                         <button
-                                            class="w-full text-[10px] font-bold uppercase tracking-wider text-primary py-1"
+                                            class="w-full text-[10px] font-bold uppercase tracking-wider text-primary py-1.5 rounded-md bg-primary/5 hover:bg-primary/10 transition-colors"
                                             onclick={() => {
                                                 router.post(
                                                     `/me/committees/posts/${post.id}/read`,
@@ -178,7 +206,7 @@
                                         >
                                             Segna come letto
                                         </button>
-                                    </Card.Footer>
+                                    </div>
                                 {/if}
                             </Card.Root>
                         {/each}

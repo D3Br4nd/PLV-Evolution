@@ -3,14 +3,12 @@
     import { Button } from "@/lib/components/ui/button";
     import * as Card from "@/lib/components/ui/card";
     import * as Dialog from "@/lib/components/ui/dialog";
-    import * as Select from "@/lib/components/ui/select";
     import * as Popover from "@/lib/components/ui/popover";
     import * as Command from "@/lib/components/ui/command";
     import { cn } from "@/lib/utils";
     import * as Table from "@/lib/components/ui/table";
     import { Input } from "@/lib/components/ui/input";
     import { Label } from "@/lib/components/ui/label";
-    import { Textarea } from "@/lib/components/ui/textarea";
     import { Badge } from "@/lib/components/ui/badge";
     import { Switch } from "@/lib/components/ui/switch";
     import { router } from "@inertiajs/svelte";
@@ -18,27 +16,24 @@
     import TrashIcon from "@tabler/icons-svelte/icons/trash";
     import UserIcon from "@tabler/icons-svelte/icons/user";
     import UploadIcon from "@tabler/icons-svelte/icons/upload";
-    import Trash2Icon from "@tabler/icons-svelte/icons/trash";
+    import FileIcon from "@tabler/icons-svelte/icons/file";
     import CheckIcon from "@tabler/icons-svelte/icons/check";
+    import EyeIcon from "@tabler/icons-svelte/icons/eye";
+    import EditIcon from "@tabler/icons-svelte/icons/edit";
     import SelectorIcon from "@tabler/icons-svelte/icons/selector";
     import { formatDistanceToNow } from "date-fns";
     import { it } from "date-fns/locale";
+    import { toast } from "svelte-sonner";
 
     let { committee, availableMembers = [] } = $props();
 
     let addMemberDialogOpen = $state(false);
-    let createPostDialogOpen = $state(false);
     let openCombobox = $state(false);
 
     let selectedMemberId = $state(null);
     let memberRole = $state("");
 
-    let postFormData = $state({
-        title: "",
-        content: "",
-    });
-
-    // Image Upload State
+    // Image Upload State (for committee logo, existing)
     let selectedImageFile = $state(null);
     let imageInputRef = $state(null);
 
@@ -89,15 +84,6 @@
                 },
             },
         );
-    }
-
-    function handleCreatePost() {
-        router.post(`/admin/committees/${committee.id}/posts`, postFormData, {
-            onSuccess: () => {
-                createPostDialogOpen = false;
-                postFormData = { title: "", content: "" };
-            },
-        });
     }
 
     function handleStatusToggle() {
@@ -212,7 +198,7 @@
                                         (confirmImageDeletionOpen = true)}
                                     title="Rimuovi logo"
                                 >
-                                    <Trash2Icon class="size-4" />
+                                    <TrashIcon class="size-4" />
                                 </Button>
                             {/if}
                         </div>
@@ -356,7 +342,9 @@
                             Post e comunicazioni del comitato
                         </Card.Description>
                     </div>
-                    <Button onclick={() => (createPostDialogOpen = true)}>
+                    <Button
+                        href="/admin/committees/{committee.id}/posts/create"
+                    >
                         <PlusIcon class="mr-2 size-4" />
                         Nuovo Post
                     </Button>
@@ -373,48 +361,150 @@
                         </p>
                     </div>
                 {:else}
-                    <div class="space-y-4">
-                        {#each committee.posts as post}
-                            <div class="rounded-lg border p-4">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold">
-                                            {post.title}
-                                        </h4>
-                                        <div
-                                            class="mt-1 flex items-center gap-2 text-sm text-muted-foreground"
+                    <div
+                        class="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden"
+                    >
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-muted/50 border-b">
+                                        <th
+                                            class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center w-12"
+                                            >#</th
                                         >
-                                            <span>{post.author.name}</span>
-                                            <span>•</span>
-                                            <span>
-                                                {formatDistanceToNow(
-                                                    new Date(post.created_at),
-                                                    {
-                                                        addSuffix: true,
-                                                        locale: it,
-                                                    },
-                                                )}
-                                            </span>
-                                        </div>
-                                        <p
-                                            class="mt-3 whitespace-pre-wrap text-sm"
+                                        <th
+                                            class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                            >Post</th
                                         >
-                                            {post.content}
-                                        </p>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onclick={() =>
-                                            handleDeletePost(post.id)}
-                                    >
-                                        <TrashIcon
-                                            class="size-4 text-destructive"
-                                        />
-                                    </Button>
-                                </div>
-                            </div>
-                        {/each}
+                                        <th
+                                            class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground w-32 text-center"
+                                            >Visualizzazioni</th
+                                        >
+                                        <th
+                                            class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground w-32 text-center"
+                                            >Media</th
+                                        >
+                                        <th
+                                            class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground w-28 text-right"
+                                            >Azioni</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    {#each committee.posts as post, i (post.id)}
+                                        <tr
+                                            class="hover:bg-muted/30 transition-colors group"
+                                        >
+                                            <td
+                                                class="px-4 py-3 text-center text-xs text-muted-foreground font-mono"
+                                            >
+                                                {i + 1}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="flex flex-col">
+                                                    <span
+                                                        class="font-medium text-sm"
+                                                        >{post.title}</span
+                                                    >
+                                                    <span
+                                                        class="text-[10px] text-muted-foreground mt-0.5"
+                                                    >
+                                                        {formatDistanceToNow(
+                                                            new Date(
+                                                                post.created_at,
+                                                            ),
+                                                            {
+                                                                addSuffix: true,
+                                                                locale: it,
+                                                            },
+                                                        )}
+                                                        • da {post.author.name}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div
+                                                    class="flex items-center justify-center gap-1.5 text-muted-foreground"
+                                                    title="Numero di lettori unici"
+                                                >
+                                                    <EyeIcon class="size-3.5" />
+                                                    <span
+                                                        class="text-xs font-medium"
+                                                        >{post.readers_count ||
+                                                            0}</span
+                                                    >
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div
+                                                    class="flex items-center justify-center gap-1"
+                                                >
+                                                    {#if post.featured_image_url}
+                                                        <div
+                                                            class="size-7 rounded border bg-muted overflow-hidden"
+                                                            title="Immagine in evidenza"
+                                                        >
+                                                            <img
+                                                                src={post.featured_image_url}
+                                                                alt=""
+                                                                class="size-full object-cover"
+                                                            />
+                                                        </div>
+                                                    {/if}
+                                                    {#if post.attachment_url}
+                                                        <div
+                                                            class="size-7 rounded border bg-muted flex items-center justify-center text-muted-foreground"
+                                                            title={post.attachment_name}
+                                                        >
+                                                            <FileIcon
+                                                                class="size-3.5"
+                                                            />
+                                                        </div>
+                                                    {/if}
+                                                    {#if !post.featured_image_url && !post.attachment_url}
+                                                        <span
+                                                            class="text-xs text-muted-foreground"
+                                                            >-</span
+                                                        >
+                                                    {/if}
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 text-right">
+                                                <div
+                                                    class="flex items-center justify-end gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        class="size-7"
+                                                        href="/admin/committees/{committee.id}/posts/{post.id}/edit"
+                                                        title="Modifica post"
+                                                    >
+                                                        <EditIcon
+                                                            class="size-3.5"
+                                                        />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        class="size-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                        onclick={() =>
+                                                            handleDeletePost(
+                                                                post.id,
+                                                            )}
+                                                        title="Elimina post"
+                                                    >
+                                                        <TrashIcon
+                                                            class="size-3.5"
+                                                        />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 {/if}
             </Card.Content>
@@ -531,63 +621,6 @@
                     <Button type="submit" disabled={!selectedMemberId}
                         >Aggiungi</Button
                     >
-                </Dialog.Footer>
-            </form>
-        </Dialog.Content>
-    </Dialog.Root>
-
-    <!-- Create Post Dialog -->
-    <Dialog.Root bind:open={createPostDialogOpen}>
-        <Dialog.Content>
-            <Dialog.Header>
-                <Dialog.Title>Nuovo Post</Dialog.Title>
-                <Dialog.Description>
-                    Pubblica un nuovo post nella bacheca del comitato.
-                </Dialog.Description>
-            </Dialog.Header>
-
-            <form
-                onsubmit={(e) => {
-                    e.preventDefault();
-                    handleCreatePost();
-                }}
-                class="space-y-4"
-            >
-                <div class="space-y-2">
-                    <Label for="title"
-                        >Titolo <span class="text-red-500">*</span></Label
-                    >
-                    <Input
-                        id="title"
-                        type="text"
-                        bind:value={postFormData.title}
-                        placeholder="Titolo del post..."
-                        required
-                    />
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="content"
-                        >Contenuto <span class="text-red-500">*</span></Label
-                    >
-                    <Textarea
-                        id="content"
-                        bind:value={postFormData.content}
-                        placeholder="Scrivi il contenuto del post..."
-                        rows={6}
-                        required
-                    />
-                </div>
-
-                <Dialog.Footer>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onclick={() => (createPostDialogOpen = false)}
-                    >
-                        Annulla
-                    </Button>
-                    <Button type="submit">Pubblica</Button>
                 </Dialog.Footer>
             </form>
         </Dialog.Content>

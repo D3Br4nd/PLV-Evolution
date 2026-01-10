@@ -56,13 +56,18 @@ class AdminCommitteeController extends Controller
      */
     public function show(string $id)
     {
-        $committee = Committee::with([
+        $committee = Committee::findOrFail($id);
+        
+        $committee->load([
             'members' => function ($query) {
                 $query->select('users.id', 'users.name', 'users.email', 'users.avatar_path')
                     ->orderBy('committee_user.joined_at', 'desc');
             },
-            'posts.author:id,name,avatar_path',
-        ])->findOrFail($id);
+            'posts' => function($query) {
+                $query->withCount('readers')->latest();
+            },
+            'posts.author:id,name,avatar_path'
+        ]);
 
         // Get all members for the "add member" dropdown, excluding already attached members
         $availableMembers = User::whereNotIn('id', $committee->members->pluck('id'))
@@ -153,6 +158,17 @@ class AdminCommitteeController extends Controller
     }
 
     /**
+     * Show the form for creating a new post.
+     */
+    public function createPost(string $committeeId)
+    {
+        $committee = Committee::findOrFail($committeeId);
+        return Inertia::render('Admin/Committees/CreatePost', [
+            'committee' => $committee,
+        ]);
+    }
+
+    /**
      * Store a new post in a committee (admin only).
      */
     public function storePost(Request $request, string $committeeId)
@@ -160,16 +176,34 @@ class AdminCommitteeController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'featured_image' => ['nullable', 'image', 'max:2048'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
         ]);
 
         $committee = Committee::findOrFail($committeeId);
 
-        $post = CommitteePost::create([
-            'committee_id' => $committee->id,
-            'author_id' => auth()->id(),
-            'title' => $validated['title'],
-            'content' => $validated['content'],
-        ]);
+        $post = new CommitteePost();
+        $post->committee_id = $committee->id;
+        $post->author_id = auth()->id();
+        $post->title = $validated['title'];
+        $post->content = $validated['content'];
+
+        // Handle featured image upload
+        if ($request->hasFile('featured_image')) {
+            $image = $request->file('featured_image');
+            $path = $image->store('committees/posts/images', 'public');
+            $post->featured_image_path = $path;
+        }
+
+        // Handle attachment upload
+        if ($request->hasFile('attachment')) {
+            $attachment = $request->file('attachment');
+            $post->attachment_name = $attachment->getClientOriginalName();
+            $path = $attachment->store('committees/posts/attachments', 'public');
+            $post->attachment_path = $path;
+        }
+
+        $post->save();
 
         // Load relations needed for the notification
         $post->load(['committee', 'author']);
@@ -192,6 +226,80 @@ class AdminCommitteeController extends Controller
         return back()->with('flash', [
             'type' => 'success',
             'message' => 'Post pubblicato nella bacheca.',
+        ]);
+    }
+
+    public function editPost(string $committeeId, string $postId)
+    {
+        $committee = Committee::findOrFail($committeeId);
+        $post = CommitteePost::where('committee_id', $committeeId)->findOrFail($postId);
+
+        return Inertia::render('Admin/Committees/EditPost', [
+            'committee' => $committee,
+            'post' => $post,
+        ]);
+    }
+
+    public function updatePost(Request $request, string $committeeId, string $postId)
+    {
+        $post = CommitteePost::where('committee_id', $committeeId)->findOrFail($postId);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'featured_image' => ['nullable', 'image', 'max:2048'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'remove_featured_image' => 'nullable|boolean',
+            'remove_attachment' => 'nullable|boolean',
+        ]);
+
+        $post->title = $validated['title'];
+        $post->content = $validated['content'];
+
+        // Handle removals
+        if ($request->boolean('remove_featured_image')) {
+            if ($post->featured_image_path) {
+                Storage::disk('public')->delete($post->featured_image_path);
+                $post->featured_image_path = null;
+            }
+        }
+
+        if ($request->boolean('remove_attachment')) {
+            if ($post->attachment_path) {
+                Storage::disk('public')->delete($post->attachment_path);
+                $post->attachment_path = null;
+                $post->attachment_name = null;
+            }
+        }
+
+        // Handle featured image upload
+        if ($request->hasFile('featured_image')) {
+            // Delete old image if exists
+            if ($post->featured_image_path) {
+                Storage::disk('public')->delete($post->featured_image_path);
+            }
+            $image = $request->file('featured_image');
+            $path = $image->store('committees/posts/images', 'public');
+            $post->featured_image_path = $path;
+        }
+
+        // Handle attachment upload
+        if ($request->hasFile('attachment')) {
+            // Delete old attachment if exists
+            if ($post->attachment_path) {
+                Storage::disk('public')->delete($post->attachment_path);
+            }
+            $attachment = $request->file('attachment');
+            $post->attachment_name = $attachment->getClientOriginalName();
+            $path = $attachment->store('committees/posts/attachments', 'public');
+            $post->attachment_path = $path;
+        }
+
+        $post->save();
+
+        return to_route('committees.show', $committeeId)->with('flash', [
+            'type' => 'success',
+            'message' => 'Post aggiornato con successo.',
         ]);
     }
 

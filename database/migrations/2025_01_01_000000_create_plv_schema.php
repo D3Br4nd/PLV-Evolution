@@ -173,6 +173,9 @@ return new class extends Migration
             $table->foreignUuid('author_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->text('content');
+            $table->string('featured_image_path')->nullable();
+            $table->string('attachment_path')->nullable();
+            $table->string('attachment_name')->nullable();
             $table->timestamps();
         });
 
