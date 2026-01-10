@@ -10,7 +10,7 @@
     import * as Card from "@/lib/components/ui/card";
     import { Switch } from "@/lib/components/ui/switch";
     import { Label } from "@/lib/components/ui/label";
-    import { User, Upload, Trash2 } from "lucide-svelte";
+    import { User, Upload, Trash2, ChevronLeft } from "lucide-svelte";
     import { Badge } from "@/lib/components/ui/badge";
     import * as Dialog from "@/lib/components/ui/dialog";
 
@@ -231,22 +231,41 @@
     }
 </script>
 
-<AdminLayout title="Scheda socio">
+<AdminLayout
+    title="Scheda socio"
+    breadcrumbs={[{ label: "Soci", href: "/admin/members" }]}
+>
     <div class="space-y-6">
-        <div class="flex items-center justify-between">
-            <p class="text-sm text-muted-foreground">Anno tessera: {year}</p>
-            <div class="flex items-center gap-2">
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div class="flex items-center gap-4">
                 <Button
-                    variant="outline"
+                    variant="ghost"
+                    size="icon"
+                    class="h-9 w-9"
                     onclick={() => router.get("/admin/members")}
                 >
-                    Torna all’elenco
+                    <ChevronLeft class="size-5" />
                 </Button>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">
+                        {member.name}
+                    </h1>
+                    <p
+                        class="text-sm text-muted-foreground uppercase tracking-wide font-medium"
+                    >
+                        Profilo Socio · Tesseramento {year}
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
                 <Button
+                    class="shadow-sm"
                     onclick={save}
                     disabled={!hydrated || Object.keys(errorsLocal).length > 0}
                 >
-                    Salva
+                    Salva modifiche
                 </Button>
             </div>
         </div>

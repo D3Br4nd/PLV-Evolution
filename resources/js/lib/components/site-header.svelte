@@ -2,8 +2,9 @@
 	import { Separator } from "@/lib/components/ui/separator/index.js";
 	import * as Sidebar from "@/lib/components/ui/sidebar/index.js";
 	import ThemeToggle from "@/lib/components/theme-toggle.svelte";
+	import * as Breadcrumb from "@/lib/components/ui/breadcrumb/index.js";
 
-	let { title = "Dashboard", headerActions } = $props();
+	let { title = "Dashboard", breadcrumbs = [], headerActions } = $props();
 
 	function todayLabel() {
 		try {
@@ -29,7 +30,23 @@
 			orientation="vertical"
 			class="mx-2 data-[orientation=vertical]:h-4"
 		/>
-		<h1 class="text-base font-medium">{title}</h1>
+		<Breadcrumb.Root>
+			<Breadcrumb.List>
+				<Breadcrumb.Item>
+					<Breadcrumb.Link href="/admin">Admin</Breadcrumb.Link>
+				</Breadcrumb.Item>
+				<Breadcrumb.Separator />
+				{#each breadcrumbs as bc}
+					<Breadcrumb.Item>
+						<Breadcrumb.Link href={bc.href}>{bc.label}</Breadcrumb.Link>
+					</Breadcrumb.Item>
+					<Breadcrumb.Separator />
+				{/each}
+				<Breadcrumb.Item>
+					<Breadcrumb.Page>{title}</Breadcrumb.Page>
+				</Breadcrumb.Item>
+			</Breadcrumb.List>
+		</Breadcrumb.Root>
 		<div class="ms-auto flex items-center gap-2">
 			<span class="hidden text-sm text-muted-foreground md:inline"
 				>{todayLabel()}</span

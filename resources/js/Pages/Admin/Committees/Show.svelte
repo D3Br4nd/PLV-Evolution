@@ -23,6 +23,7 @@
     import SelectorIcon from "@tabler/icons-svelte/icons/selector";
     import { formatDistanceToNow } from "date-fns";
     import { it } from "date-fns/locale";
+    import ArrowLeftIcon from "@tabler/icons-svelte/icons/arrow-left";
     import { toast } from "svelte-sonner";
 
     let { committee, availableMembers = [] } = $props();
@@ -146,16 +147,28 @@
     }
 </script>
 
-<AdminLayout title={committee.name}>
-    <div class="space-y-6">
-        <!-- Committee Header -->
-        <div>
-            <div class="flex items-center justify-between">
+<AdminLayout
+    title={committee.name}
+    breadcrumbs={[{ label: "Comitati", href: "/admin/committees" }]}
+>
+    <div class="@container/main space-y-6">
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div class="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-9 w-9"
+                    onclick={() => router.get("/admin/committees")}
+                >
+                    <ArrowLeftIcon class="size-5" />
+                </Button>
                 <div class="flex items-center gap-6">
-                    <!-- Committee Image -->
+                    <!-- Committee Image (Logo) -->
                     <div class="relative group">
                         <div
-                            class="size-24 rounded-2xl border-2 border-dashed border-muted-foreground/25 bg-muted flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/50"
+                            class="size-16 rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/50"
                         >
                             {#if committee.image_url}
                                 <img
@@ -164,12 +177,12 @@
                                     class="h-full w-full object-cover"
                                 />
                             {:else}
-                                <div class="text-center p-2">
+                                <div class="text-center p-1">
                                     <UserIcon
-                                        class="size-8 mx-auto text-muted-foreground/50 mb-1"
+                                        class="size-5 mx-auto text-muted-foreground/50 mb-0.5"
                                     />
                                     <span
-                                        class="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider"
+                                        class="text-[8px] text-muted-foreground uppercase font-semibold tracking-wider"
                                         >No Logo</span
                                     >
                                 </div>
@@ -178,27 +191,27 @@
 
                         <!-- Upload/Delete Overlay -->
                         <div
-                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
+                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5"
                         >
                             <Button
                                 variant="secondary"
                                 size="icon"
-                                class="size-8 rounded-full"
+                                class="size-7 rounded-full"
                                 onclick={() => imageInputRef?.click()}
                                 title="Carica logo"
                             >
-                                <UploadIcon class="size-4" />
+                                <UploadIcon class="size-3.5" />
                             </Button>
                             {#if committee.image_url}
                                 <Button
                                     variant="destructive"
                                     size="icon"
-                                    class="size-8 rounded-full"
+                                    class="size-7 rounded-full"
                                     onclick={() =>
                                         (confirmImageDeletionOpen = true)}
                                     title="Rimuovi logo"
                                 >
-                                    <TrashIcon class="size-4" />
+                                    <TrashIcon class="size-3.5" />
                                 </Button>
                             {/if}
                         </div>
@@ -216,37 +229,35 @@
                         <h1 class="text-3xl font-bold tracking-tight">
                             {committee.name}
                         </h1>
-                        {#if committee.description}
-                            <p class="mt-2 text-muted-foreground">
-                                {committee.description}
-                            </p>
-                        {/if}
+                        <p class="text-sm text-muted-foreground">
+                            {committee.description ||
+                                "Gestisci membri, cariche e bacheca comunicazioni del comitato."}
+                        </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <Label
-                            for="committee-status"
-                            class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
-                        >
-                            {committee.status === "active"
-                                ? "Attivo"
-                                : "Inattivo"}
-                        </Label>
-                        <Switch
-                            id="committee-status"
-                            checked={committee.status === "active"}
-                            onCheckedChange={handleStatusToggle}
-                        />
-                    </div>
-                    <Badge
-                        variant={committee.status === "active"
-                            ? "default"
-                            : "secondary"}
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <Label
+                        for="committee-status"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
                         {committee.status === "active" ? "Attivo" : "Inattivo"}
-                    </Badge>
+                    </Label>
+                    <Switch
+                        id="committee-status"
+                        checked={committee.status === "active"}
+                        onCheckedChange={handleStatusToggle}
+                    />
                 </div>
+                <Badge
+                    variant={committee.status === "active"
+                        ? "default"
+                        : "secondary"}
+                >
+                    {committee.status === "active" ? "Attivo" : "Inattivo"}
+                </Badge>
             </div>
         </div>
 

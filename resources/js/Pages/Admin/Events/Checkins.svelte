@@ -7,14 +7,14 @@
     import * as Card from "@/lib/components/ui/card";
     import * as Table from "@/lib/components/ui/table";
 
+    import ChevronLeft from "lucide-svelte/icons/chevron-left";
+    import Download from "lucide-svelte/icons/download";
+
     let { event, checkins } = $props();
     let flash = $derived($page.props.flash);
 
     let qr_code = $state("");
     let processing = $state(false);
-    let headerTitle = $derived.by(() =>
-        `Check-in · ${event?.title || ""}`.trim(),
-    );
 
     function submit() {
         if (!qr_code.trim()) return;
@@ -31,23 +31,43 @@
     }
 </script>
 
-<AdminLayout title={headerTitle}>
-    {#snippet headerActions()}
-        <Button variant="outline" onclick={() => router.get("/admin/events")}>
-            Torna agli eventi
-        </Button>
-        <Button
-            variant="outline"
-            href={`/admin/events/${event.id}/checkins/export`}
-        >
-            Esporta CSV
-        </Button>
-    {/snippet}
-
+<AdminLayout
+    title="Presenze Evento"
+    breadcrumbs={[{ label: "Eventi", href: "/admin/events" }]}
+>
     <div class="space-y-6">
-        <p class="text-sm text-muted-foreground">
-            Evento: <span class="text-foreground">{event.title}</span>
-        </p>
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div class="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-9 w-9"
+                    onclick={() => router.get("/admin/events")}
+                >
+                    <ChevronLeft class="size-5" />
+                </Button>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">
+                        Presenze Evento
+                    </h1>
+                    <p class="text-sm text-muted-foreground">
+                        {event.title}
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <Button
+                    variant="outline"
+                    class="shadow-sm"
+                    href={`/admin/events/${event.id}/checkins/export`}
+                >
+                    <Download class="h-4 w-4 mr-2" />
+                    Esporta CSV
+                </Button>
+            </div>
+        </div>
 
         <Card.Root>
             <Card.Header>

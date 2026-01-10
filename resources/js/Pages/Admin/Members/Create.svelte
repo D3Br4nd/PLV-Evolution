@@ -10,6 +10,8 @@
 
     import italyPlaces from "@/data/italy_places.json";
 
+    import ChevronLeft from "lucide-svelte/icons/chevron-left";
+
     let { year } = $props();
     let flash = $derived($page.props.flash);
     let errors = $derived($page.props.errors || {});
@@ -76,23 +78,43 @@
     }
 </script>
 
-<AdminLayout title="Nuovo socio">
-    {#snippet headerActions()}
-        <Button variant="outline" onclick={() => router.get("/admin/members")}>
-            Torna all’elenco
-        </Button>
-        <Button onclick={save} disabled={processing}>
-            {processing ? "Creazione..." : "Crea socio"}
-        </Button>
-    {/snippet}
-
+<AdminLayout
+    title="Nuovo socio"
+    breadcrumbs={[{ label: "Soci", href: "/admin/members" }]}
+>
     <div class="space-y-6">
-        <p class="text-sm text-muted-foreground">
-            Compila i dati del socio. Dopo la creazione verrà aperta la scheda completa.
-        </p>
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div class="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-9 w-9"
+                    onclick={() => router.get("/admin/members")}
+                >
+                    <ChevronLeft class="size-5" />
+                </Button>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">
+                        Nuovo Socio
+                    </h1>
+                    <p class="text-sm text-muted-foreground">
+                        Registra un nuovo membro dell'associazione.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <Button class="shadow-sm" onclick={save} disabled={processing}>
+                    {processing ? "Creazione..." : "Crea socio"}
+                </Button>
+            </div>
+        </div>
 
         {#if flash?.success}
-            <div class="text-sm text-green-600 dark:text-green-400">{flash.success}</div>
+            <div class="text-sm text-green-600 dark:text-green-400">
+                {flash.success}
+            </div>
         {/if}
         {#if flash?.error}
             <div class="text-sm text-destructive">{flash.error}</div>
@@ -106,17 +128,30 @@
                 </Card.Header>
                 <Card.Content class="space-y-4">
                     <div class="space-y-1.5">
-                        <div class="text-xs text-muted-foreground">Nome visualizzato</div>
-                        <Input bind:value={form.name} placeholder="Nome (visualizzato)" />
+                        <div class="text-xs text-muted-foreground">
+                            Nome visualizzato
+                        </div>
+                        <Input
+                            bind:value={form.name}
+                            placeholder="Nome (visualizzato)"
+                        />
                         {#if errors?.name}
-                            <p class="text-sm text-destructive">{errors.name}</p>
+                            <p class="text-sm text-destructive">
+                                {errors.name}
+                            </p>
                         {/if}
                     </div>
                     <div class="space-y-1.5">
                         <div class="text-xs text-muted-foreground">Email</div>
-                        <Input type="email" bind:value={form.email} placeholder="Email" />
+                        <Input
+                            type="email"
+                            bind:value={form.email}
+                            placeholder="Email"
+                        />
                         {#if errors?.email}
-                            <p class="text-sm text-destructive">{errors.email}</p>
+                            <p class="text-sm text-destructive">
+                                {errors.email}
+                            </p>
                         {/if}
                     </div>
                     <div class="space-y-1.5">
@@ -134,33 +169,48 @@
                             <Input value="Socio" disabled />
                         {/if}
                         {#if errors?.role}
-                            <p class="text-sm text-destructive">{errors.role}</p>
+                            <p class="text-sm text-destructive">
+                                {errors.role}
+                            </p>
                         {/if}
                     </div>
                     <div class="space-y-1.5">
-                        <div class="text-xs text-muted-foreground">Ruolo Pro Loco (incarico)</div>
+                        <div class="text-xs text-muted-foreground">
+                            Ruolo Pro Loco (incarico)
+                        </div>
                         <select
                             bind:value={form.plv_role}
                             class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                         >
                             <option value="">— Seleziona —</option>
                             <option value="PRESIDENTE">PRESIDENTE</option>
-                            <option value="VICE PRESIDENTE">VICE PRESIDENTE</option>
+                            <option value="VICE PRESIDENTE"
+                                >VICE PRESIDENTE</option
+                            >
                             <option value="CASSIERE">CASSIERE</option>
                             <option value="SEGRETARIO">SEGRETARIO</option>
                             <option value="MAGAZZINIERE">MAGAZZINIERE</option>
                             <option value="CONSIGLIERE">CONSIGLIERE</option>
-                            <option value="PRESIDENTE DEI REVISORI">PRESIDENTE DEI REVISORI</option>
+                            <option value="PRESIDENTE DEI REVISORI"
+                                >PRESIDENTE DEI REVISORI</option
+                            >
                             <option value="REVISORE">REVISORE</option>
-                            <option value="SUPPLENTE REVISORE">SUPPLENTE REVISORE</option>
-                            <option value="PRESIDENTE DEI PROBIVIRI">PRESIDENTE DEI PROBIVIRI</option>
+                            <option value="SUPPLENTE REVISORE"
+                                >SUPPLENTE REVISORE</option
+                            >
+                            <option value="PRESIDENTE DEI PROBIVIRI"
+                                >PRESIDENTE DEI PROBIVIRI</option
+                            >
                             <option value="PROBIVIRO">PROBIVIRO</option>
                         </select>
                         {#if errors?.plv_role}
-                            <p class="text-sm text-destructive">{errors.plv_role}</p>
+                            <p class="text-sm text-destructive">
+                                {errors.plv_role}
+                            </p>
                         {/if}
                         <p class="text-xs text-muted-foreground">
-                            Questo campo descrive l’incarico nella Pro Loco. I permessi del backend restano separati.
+                            Questo campo descrive l’incarico nella Pro Loco. I
+                            permessi del backend restano separati.
                         </p>
                     </div>
                 </Card.Content>
@@ -173,30 +223,49 @@
                 <Card.Content class="space-y-4">
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Nome</div>
-                            <Input bind:value={form.first_name} placeholder="Nome" />
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Nome
+                            </div>
+                            <Input
+                                bind:value={form.first_name}
+                                placeholder="Nome"
+                            />
                         </div>
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Cognome</div>
-                            <Input bind:value={form.last_name} placeholder="Cognome" />
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Cognome
+                            </div>
+                            <Input
+                                bind:value={form.last_name}
+                                placeholder="Cognome"
+                            />
                         </div>
                     </div>
 
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Data di nascita</div>
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Data di nascita
+                            </div>
                             <Input type="date" bind:value={form.birth_date} />
                         </div>
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Telefono</div>
-                            <Input bind:value={form.phone} placeholder="Numero di telefono" />
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Telefono
+                            </div>
+                            <Input
+                                bind:value={form.phone}
+                                placeholder="Numero di telefono"
+                            />
                         </div>
                     </div>
 
                     <div class="border-t border-border pt-4 space-y-3">
                         <div class="text-sm font-medium">Luogo di nascita</div>
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Italia / Estero</div>
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Italia / Estero
+                            </div>
                             <select
                                 bind:value={form.birth_place_type}
                                 class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -209,25 +278,39 @@
                         {#if form.birth_place_type === "it"}
                             <div class="grid gap-3 sm:grid-cols-2">
                                 <div>
-                                    <div class="text-xs text-muted-foreground mb-1">Provincia</div>
+                                    <div
+                                        class="text-xs text-muted-foreground mb-1"
+                                    >
+                                        Provincia
+                                    </div>
                                     <select
                                         bind:value={form.birth_province_code}
                                         class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                     >
-                                        <option value="">Seleziona provincia...</option>
+                                        <option value=""
+                                            >Seleziona provincia...</option
+                                        >
                                         {#each italyPlaces.provinces as p (p.code)}
-                                            <option value={p.code}>{p.name} ({p.code})</option>
+                                            <option value={p.code}
+                                                >{p.name} ({p.code})</option
+                                            >
                                         {/each}
                                     </select>
                                 </div>
                                 <div>
-                                    <div class="text-xs text-muted-foreground mb-1">Città</div>
+                                    <div
+                                        class="text-xs text-muted-foreground mb-1"
+                                    >
+                                        Città
+                                    </div>
                                     <select
                                         bind:value={form.birth_city}
                                         class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                         disabled={!form.birth_province_code}
                                     >
-                                        <option value="">Seleziona città...</option>
+                                        <option value=""
+                                            >Seleziona città...</option
+                                        >
                                         {#each citiesForBirthProvince as c (c)}
                                             <option value={c}>{c}</option>
                                         {/each}
@@ -237,12 +320,26 @@
                         {:else}
                             <div class="grid gap-3 sm:grid-cols-2">
                                 <div>
-                                    <div class="text-xs text-muted-foreground mb-1">Città</div>
-                                    <Input bind:value={form.birth_city} placeholder="Città (estero)" />
+                                    <div
+                                        class="text-xs text-muted-foreground mb-1"
+                                    >
+                                        Città
+                                    </div>
+                                    <Input
+                                        bind:value={form.birth_city}
+                                        placeholder="Città (estero)"
+                                    />
                                 </div>
                                 <div>
-                                    <div class="text-xs text-muted-foreground mb-1">Nazione</div>
-                                    <Input bind:value={form.birth_country} placeholder="Nazione" />
+                                    <div
+                                        class="text-xs text-muted-foreground mb-1"
+                                    >
+                                        Nazione
+                                    </div>
+                                    <Input
+                                        bind:value={form.birth_country}
+                                        placeholder="Nazione"
+                                    />
                                 </div>
                             </div>
                         {/if}
@@ -256,7 +353,9 @@
                 </Card.Header>
                 <Card.Content class="space-y-4">
                     <div>
-                        <div class="text-xs text-muted-foreground mb-1">Italia / Estero</div>
+                        <div class="text-xs text-muted-foreground mb-1">
+                            Italia / Estero
+                        </div>
                         <select
                             bind:value={form.residence_type}
                             class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -268,36 +367,59 @@
 
                     <div class="grid gap-3 sm:grid-cols-3">
                         <div class="sm:col-span-2">
-                            <div class="text-xs text-muted-foreground mb-1">Via</div>
-                            <Input bind:value={form.residence_street} placeholder="Via" />
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Via
+                            </div>
+                            <Input
+                                bind:value={form.residence_street}
+                                placeholder="Via"
+                            />
                         </div>
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Numero civico</div>
-                            <Input bind:value={form.residence_house_number} placeholder="N." />
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Numero civico
+                            </div>
+                            <Input
+                                bind:value={form.residence_house_number}
+                                placeholder="N."
+                            />
                         </div>
                     </div>
 
                     <div>
-                        <div class="text-xs text-muted-foreground mb-1">Frazione</div>
-                        <Input bind:value={form.residence_locality} placeholder="Frazione" />
+                        <div class="text-xs text-muted-foreground mb-1">
+                            Frazione
+                        </div>
+                        <Input
+                            bind:value={form.residence_locality}
+                            placeholder="Frazione"
+                        />
                     </div>
 
                     {#if form.residence_type === "it"}
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
-                                <div class="text-xs text-muted-foreground mb-1">Provincia</div>
+                                <div class="text-xs text-muted-foreground mb-1">
+                                    Provincia
+                                </div>
                                 <select
                                     bind:value={form.residence_province_code}
                                     class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
-                                    <option value="">Seleziona provincia...</option>
+                                    <option value=""
+                                        >Seleziona provincia...</option
+                                    >
                                     {#each italyPlaces.provinces as p (p.code)}
-                                        <option value={p.code}>{p.name} ({p.code})</option>
+                                        <option value={p.code}
+                                            >{p.name} ({p.code})</option
+                                        >
                                     {/each}
                                 </select>
                             </div>
                             <div>
-                                <div class="text-xs text-muted-foreground mb-1">Città</div>
+                                <div class="text-xs text-muted-foreground mb-1">
+                                    Città
+                                </div>
                                 <select
                                     bind:value={form.residence_city}
                                     class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -313,12 +435,22 @@
                     {:else}
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
-                                <div class="text-xs text-muted-foreground mb-1">Città</div>
-                                <Input bind:value={form.residence_city} placeholder="Città (estero)" />
+                                <div class="text-xs text-muted-foreground mb-1">
+                                    Città
+                                </div>
+                                <Input
+                                    bind:value={form.residence_city}
+                                    placeholder="Città (estero)"
+                                />
                             </div>
                             <div>
-                                <div class="text-xs text-muted-foreground mb-1">Nazione</div>
-                                <Input bind:value={form.residence_country} placeholder="Nazione" />
+                                <div class="text-xs text-muted-foreground mb-1">
+                                    Nazione
+                                </div>
+                                <Input
+                                    bind:value={form.residence_country}
+                                    placeholder="Nazione"
+                                />
                             </div>
                         </div>
                     {/if}
@@ -332,21 +464,27 @@
                 <Card.Content class="space-y-4">
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Data iscrizione PLV</div>
-                            <Input type="date" bind:value={form.plv_joined_at} />
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Data iscrizione PLV
+                            </div>
+                            <Input
+                                type="date"
+                                bind:value={form.plv_joined_at}
+                            />
                         </div>
                         <div>
-                            <div class="text-xs text-muted-foreground mb-1">Scadenza (1 anno)</div>
+                            <div class="text-xs text-muted-foreground mb-1">
+                                Scadenza (1 anno)
+                            </div>
                             <Input value={expiresPreview} disabled />
                         </div>
                     </div>
                     <div class="text-xs text-muted-foreground">
-                        La scadenza viene calcolata automaticamente dal backend come 1 anno dalla data iscrizione.
+                        La scadenza viene calcolata automaticamente dal backend
+                        come 1 anno dalla data iscrizione.
                     </div>
                 </Card.Content>
             </Card.Root>
         </div>
     </div>
 </AdminLayout>
-
-

@@ -243,42 +243,60 @@
     }
 </script>
 
-<AdminLayout title={headerTitle}>
+<AdminLayout title="Calendario Eventi">
     {#snippet headerActions()}
         <!-- Empty header actions -->
     {/snippet}
 
-    <div class="h-full flex flex-col space-y-4">
-        <!-- Toolbar con navigazione e filtro -->
-        <div class="flex items-center justify-between gap-4 pb-4 border-b">
-            <div class="flex items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onclick={previousMonth}
-                    aria-label="Mese precedente"
-                >
-                    <ChevronLeft />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onclick={nextMonth}
-                    aria-label="Mese successivo"
-                >
-                    <ChevronRight />
+    <div class="h-full flex flex-col space-y-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Calendario Eventi</h1>
+                <p class="text-sm text-muted-foreground uppercase tracking-wide font-medium">
+                    {current.toLocaleString("it-IT", { month: "long", year: "numeric" })}
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 border rounded-md p-1 bg-background shadow-sm">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        class="size-8"
+                        onclick={previousMonth}
+                        aria-label="Mese precedente"
+                    >
+                        <ChevronLeft class="size-4" />
+                    </Button>
+                    <div class="text-xs font-bold px-2 min-w-[100px] text-center capitalize">
+                        {current.toLocaleString("it-IT", { month: "short" })}
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        class="size-8"
+                        onclick={nextMonth}
+                        aria-label="Mese successivo"
+                    >
+                        <ChevronRight class="size-4" />
+                    </Button>
+                </div>
+                <Button onclick={() => openNewEvent(new Date())} class="shadow-sm">
+                    Nuovo evento
                 </Button>
             </div>
+        </div>
 
+        <!-- Toolbar con navigazione e filtro -->
+        <div class="flex items-center justify-between gap-4 pb-4 border-b">
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
-                    <span class="text-sm text-muted-foreground">Tipo:</span>
+                    <span class="text-sm text-muted-foreground">Filtra per tipo:</span>
                     <Select.Root
                         type="single"
                         value={filterType || "all"}
                         onValueChange={(v) => setFilter(v === "all" ? null : v)}
                     >
-                        <Select.Trigger class="w-[180px]">
+                        <Select.Trigger class="w-[180px] h-9">
                             <span data-slot="select-value" class="truncate">
                                 {filterType === "all" || !filterType
                                     ? "Tutti gli eventi"
@@ -291,9 +309,7 @@
                             </span>
                         </Select.Trigger>
                         <Select.Content>
-                            <Select.Item value="all"
-                                >Tutti gli eventi</Select.Item
-                            >
+                            <Select.Item value="all">Tutti gli eventi</Select.Item>
                             <Select.Item value="meeting">Riunione</Select.Item>
                             <Select.Item value="event">Evento</Select.Item>
                             <Select.Item value="fair">Fiera</Select.Item>
@@ -301,10 +317,6 @@
                         </Select.Content>
                     </Select.Root>
                 </div>
-
-                <Button onclick={() => openNewEvent(new Date())}>
-                    Nuovo evento
-                </Button>
             </div>
         </div>
 

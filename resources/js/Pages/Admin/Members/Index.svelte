@@ -206,9 +206,43 @@
 
 <AdminLayout title="Soci">
     <div class="@container/main space-y-6">
-        <p class="text-sm text-muted-foreground">
-            Gestisci i membri dell'associazione.
-        </p>
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Elenco Soci</h1>
+                <p class="text-sm text-muted-foreground">
+                    Gestisci i membri dell'associazione, i loro ruoli e la
+                    validità del tesseramento.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                        <Button variant="outline" class="shadow-sm">
+                            <MoreVertical class="h-4 w-4 mr-2" />
+                            Azioni
+                        </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content align="end">
+                        <DropdownMenu.Item onclick={handleExport}>
+                            <Download class="h-4 w-4 mr-2" />
+                            Esporta CSV
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item onclick={openImportDialog}>
+                            <Upload class="h-4 w-4 mr-2" />
+                            Importa CSV
+                        </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                </DropdownMenu.Root>
+                <Button
+                    class="shadow-sm"
+                    onclick={() => router.get("/admin/members/create")}
+                >
+                    Nuovo socio
+                </Button>
+            </div>
+        </div>
 
         {#if flash?.success}
             <div class="text-sm text-green-600 dark:text-green-400">
@@ -332,29 +366,6 @@
                         <option value="PROBIVIRO">PROBIVIRO</option>
                     </select>
                 </div>
-            </div>
-            <div class="flex gap-2">
-                <DropdownMenu.Root>
-                    <DropdownMenu.Trigger>
-                        <Button variant="outline">
-                            <MoreVertical class="h-4 w-4 mr-2" />
-                            Azioni
-                        </Button>
-                    </DropdownMenu.Trigger>
-                    <DropdownMenu.Content align="end">
-                        <DropdownMenu.Item onclick={handleExport}>
-                            <Download class="h-4 w-4 mr-2" />
-                            Esporta CSV
-                        </DropdownMenu.Item>
-                        <DropdownMenu.Item onclick={openImportDialog}>
-                            <Upload class="h-4 w-4 mr-2" />
-                            Importa CSV
-                        </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                </DropdownMenu.Root>
-                <Button onclick={() => router.get("/admin/members/create")}
-                    >Nuovo socio</Button
-                >
             </div>
         </div>
 

@@ -16,6 +16,7 @@
     import ListIcon from "@tabler/icons-svelte/icons/list";
     import ListNumbersIcon from "@tabler/icons-svelte/icons/list-numbers";
     import LinkIcon from "@tabler/icons-svelte/icons/link";
+    import ChevronLeft from "lucide-svelte/icons/chevron-left";
     import SendIcon from "@tabler/icons-svelte/icons/send";
     import UploadIcon from "@tabler/icons-svelte/icons/upload";
     import XIcon from "@tabler/icons-svelte/icons/x";
@@ -160,24 +161,44 @@
     }
 </script>
 
-<AdminLayout title="Nuova Notifica Broadcast">
+<AdminLayout
+    title="Nuova Notifica"
+    breadcrumbs={[{ label: "Notifiche", href: "/admin/broadcasts" }]}
+>
     <div class="space-y-6">
-        <div>
-            <h1 class="text-3xl font-bold tracking-tight">
-                Nuova Notifica Broadcast
-            </h1>
-            <p class="mt-1 text-muted-foreground">
-                Questa notifica verrà inviata a tutti i soci attivi
-            </p>
-        </div>
-
         <div
-            class="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-4"
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
-            <UsersIcon class="size-5 text-primary" />
-            <span class="text-sm font-medium">
-                {activeMembersCount} soci attivi riceveranno questa notifica
-            </span>
+            <div class="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-9 w-9"
+                    onclick={() => router.get("/admin/broadcasts")}
+                >
+                    <ChevronLeft class="size-5" />
+                </Button>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">
+                        Nuova Notifica
+                    </h1>
+                    <p class="text-sm text-muted-foreground">
+                        Inviata a <span class="text-foreground font-medium"
+                            >{activeMembersCount} soci attivi</span
+                        >
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <Button
+                    class="shadow-sm"
+                    onclick={handleSubmit}
+                    disabled={submitting}
+                >
+                    <SendIcon class="mr-2 size-4" />
+                    {submitting ? "Invio in corso..." : "Invia ora"}
+                </Button>
+            </div>
         </div>
 
         <Card.Root>
@@ -370,19 +391,6 @@
                             </p>
                         </div>
                     {/if}
-                </div>
-
-                <!-- Submit -->
-                <div class="flex justify-end gap-3 border-t pt-6">
-                    <Button variant="outline" href="/admin/broadcasts">
-                        Annulla
-                    </Button>
-                    <Button onclick={handleSubmit} disabled={submitting}>
-                        <SendIcon class="mr-2 size-4" />
-                        {submitting
-                            ? "Invio in corso..."
-                            : `Invia a ${activeMembersCount} soci`}
-                    </Button>
                 </div>
             </Card.Content>
         </Card.Root>

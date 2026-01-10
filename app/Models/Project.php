@@ -13,10 +13,29 @@ class Project extends Model
     protected $fillable = [
         'title',
         'description',
+        'content',
         'status',
         'priority',
+        'deadline',
+        'committee_id',
         'assignee_id',
     ];
+
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
+
+    public function committee()
+    {
+        return $this->belongsTo(Committee::class);
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(User::class, 'project_user')
+            ->using(ProjectUser::class)
+            ->withTimestamps();
+    }
 
     public function assignee()
     {

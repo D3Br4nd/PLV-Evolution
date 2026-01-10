@@ -85,6 +85,13 @@ Route::middleware('auth')->prefix('me/committees')->group(function () {
 Route::middleware('auth')->get('/me/broadcasts/{broadcast}', [\App\Http\Controllers\MemberBroadcastController::class, 'show'])
     ->name('member.broadcasts.show');
 
+// Projects (PWA)
+Route::middleware('auth')->prefix('me/projects')->group(function () {
+    Route::get('/', [\App\Http\Controllers\MemberProjectController::class, 'index'])->name('member.projects.index');
+    Route::get('/{project}', [\App\Http\Controllers\MemberProjectController::class, 'show'])->name('member.projects.show');
+    Route::patch('/{project}', [\App\Http\Controllers\MemberProjectController::class, 'update'])->name('member.projects.update');
+});
+
 // One-time invitation link (public)
 Route::get('/invite/{token}', [MemberInvitationAcceptController::class, 'show'])->name('invite.accept');
 Route::post('/invite/{token}', [MemberInvitationAcceptController::class, 'store'])->name('invite.store');

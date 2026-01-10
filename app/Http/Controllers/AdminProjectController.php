@@ -13,12 +13,17 @@ class AdminProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::with('assignee')
+        $projects = Project::with(['assignee', 'members', 'committee'])
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $users = \App\Models\User::orderBy('name')->get();
+        $committees = \App\Models\Committee::orderBy('name')->get();
+
         return Inertia::render('Admin/Projects/Board', [
-            'projects' => $projects
+            'projects' => $projects,
+            'users' => $users,
+            'committees' => $committees
         ]);
     }
 
@@ -31,12 +36,35 @@ class AdminProjectController extends Controller
             'title' => 'required|string|max:255',
             'status' => 'required|string|in:todo,in_progress,done',
             'priority' => 'required|string|in:low,medium,high',
+            'description' => 'nullable|string',
+            'content' => 'nullable|string',
+            'deadline' => 'nullable|date',
+            'committee_id' => 'nullable|exists:committees,id',
+            'members' => 'nullable|array',
+            'members.*' => 'exists:users,id',
         ]);
 
         $project = Project::create($validated);
 
+        if (!empty($validated['members'])) {
+            $project->members()->sync($validated['members']);
+        }
+
+        // Notify Admins and Assigned Members
+        $admins = \App\Models\User::where('role', \App\Enums\UserRole::Admin->value)
+            ->orWhere('role', \App\Enums\UserRole::SuperAdmin->value)
+            ->get();
+            
+        $membersToNotify = $project->members;
+        $usersToNotify = $admins->merge($membersToNotify)->unique('id');
+
+        $notification = new \App\Notifications\ProjectUpdateNotification($project, null, true);
         
-        return redirect()->back()->with('success', 'Task creato.');
+        foreach ($usersToNotify as $user) {
+            $user->notify($notification);
+        }
+
+        return redirect()->back()->with('success', 'Progetto creato e notifiche inviate.');
     }
 
     /**
@@ -44,15 +72,43 @@ class AdminProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        $oldStatus = $project->status;
+
         $validated = $request->validate([
-            'status' => 'required|string|in:todo,in_progress,done',
-            // Allow updating other fields too if needed, but primarily status for DnD
+            'title' => 'sometimes|required|string|max:255',
+            'status' => 'sometimes|required|string|in:todo,in_progress,done',
+            'priority' => 'sometimes|required|string|in:low,medium,high',
+            'description' => 'nullable|string',
+            'content' => 'nullable|string',
+            'deadline' => 'nullable|date',
+            'committee_id' => 'nullable|exists:committees,id',
+            'members' => 'nullable|array',
+            'members.*' => 'exists:users,id',
         ]);
 
         $project->update($validated);
 
+        if ($request->has('members')) {
+            $project->members()->sync($validated['members'] ?? []);
+        }
 
-        return redirect()->back(); // Inertia handles state preservation
+        // Notify on status change
+        if ($oldStatus !== $project->status) {
+            $notification = new \App\Notifications\ProjectUpdateNotification($project, $oldStatus, false);
+            
+            $admins = \App\Models\User::where('role', \App\Enums\UserRole::Admin->value)
+                ->orWhere('role', \App\Enums\UserRole::SuperAdmin->value)
+                ->get();
+            
+            $membersToNotify = $project->members;
+            $usersToNotify = $admins->merge($membersToNotify)->unique('id');
+            
+            foreach ($usersToNotify as $user) {
+                $user->notify($notification);
+            }
+        }
+
+        return redirect()->back();
     }
     
     /**
@@ -60,10 +116,7 @@ class AdminProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $summary = 'Eliminato task: '.$project->title;
         $project->delete();
-
-
         return redirect()->back();
     }
 }

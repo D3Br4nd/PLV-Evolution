@@ -120,8 +120,20 @@
 </script>
 
 <AdminLayout title="Profilo">
-    <div class="space-y-6">
-        <p class="text-sm text-muted-foreground">Dati personali e cambio password.</p>
+    <div class="@container/main space-y-6">
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">
+                    Il Mio Profilo
+                </h1>
+                <p class="text-sm text-muted-foreground">
+                    Gestisci i tuoi dati personali, l'avatar e le impostazioni
+                    di sicurezza.
+                </p>
+            </div>
+        </div>
 
         {#if flash?.success}
             <div class="text-sm text-green-600 dark:text-green-400">
@@ -141,8 +153,13 @@
                 <Card.Content class="space-y-4">
                     <div class="flex items-center gap-3">
                         <Avatar.Root class="size-10">
-                            <Avatar.Image src={user?.avatar_url} alt={user?.name} />
-                            <Avatar.Fallback class="bg-primary text-primary-foreground text-sm font-semibold">
+                            <Avatar.Image
+                                src={user?.avatar_url}
+                                alt={user?.name}
+                            />
+                            <Avatar.Fallback
+                                class="bg-primary text-primary-foreground text-sm font-semibold"
+                            >
                                 {initials(user?.name)}
                             </Avatar.Fallback>
                         </Avatar.Root>
@@ -155,16 +172,24 @@
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium" for="p-avatar">Avatar</label>
+                        <label class="text-sm font-medium" for="p-avatar"
+                            >Avatar</label
+                        >
                         <div class="flex items-center gap-2">
                             <Input
                                 id="p-avatar"
                                 type="file"
                                 accept="image/*"
                                 disabled={avatarProcessing}
-                                onchange={(e) => (avatarFile = e.currentTarget.files?.[0] || null)}
+                                onchange={(e) =>
+                                    (avatarFile =
+                                        e.currentTarget.files?.[0] || null)}
                             />
-                            <Button variant="outline" disabled={avatarProcessing || !avatarFile} onclick={uploadAvatar}>
+                            <Button
+                                variant="outline"
+                                disabled={avatarProcessing || !avatarFile}
+                                onclick={uploadAvatar}
+                            >
                                 {avatarProcessing ? "Caricamento..." : "Carica"}
                             </Button>
                             <Button
@@ -176,7 +201,9 @@
                             </Button>
                         </div>
                         {#if $page.props.errors?.avatar}
-                            <p class="text-sm text-destructive">{$page.props.errors.avatar}</p>
+                            <p class="text-sm text-destructive">
+                                {$page.props.errors.avatar}
+                            </p>
                         {/if}
                         <p class="text-xs text-muted-foreground">
                             JPG/PNG/WebP, max 2MB.
@@ -189,13 +216,15 @@
                             <div class="rounded-lg border bg-card p-4">
                                 <div class="flex items-center gap-4">
                                     <img
-                                        src={avatarPreviewUrl || user?.avatar_url}
+                                        src={avatarPreviewUrl ||
+                                            user?.avatar_url}
                                         alt="Anteprima avatar"
                                         class="h-24 w-24 rounded-md object-cover border bg-background"
                                     />
                                     <div class="text-xs text-muted-foreground">
                                         {#if avatarPreviewUrl}
-                                            Questa è l’immagine selezionata (prima del caricamento).
+                                            Questa è l’immagine selezionata
+                                            (prima del caricamento).
                                         {:else}
                                             Avatar attuale.
                                         {/if}
@@ -206,18 +235,30 @@
                     {/if}
 
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium" for="p-name">Nome</label>
+                        <label class="text-sm font-medium" for="p-name"
+                            >Nome</label
+                        >
                         <Input id="p-name" bind:value={profileForm.name} />
                         {#if $page.props.errors?.name}
-                            <p class="text-sm text-destructive">{$page.props.errors.name}</p>
+                            <p class="text-sm text-destructive">
+                                {$page.props.errors.name}
+                            </p>
                         {/if}
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-sm font-medium" for="p-email">Email</label>
-                        <Input id="p-email" type="email" bind:value={profileForm.email} />
+                        <label class="text-sm font-medium" for="p-email"
+                            >Email</label
+                        >
+                        <Input
+                            id="p-email"
+                            type="email"
+                            bind:value={profileForm.email}
+                        />
                         {#if $page.props.errors?.email}
-                            <p class="text-sm text-destructive">{$page.props.errors.email}</p>
+                            <p class="text-sm text-destructive">
+                                {$page.props.errors.email}
+                            </p>
                         {/if}
                     </div>
                 </Card.Content>
@@ -256,9 +297,15 @@
                         <label class="text-sm font-medium" for="pw-new"
                             >Nuova password</label
                         >
-                        <Input id="pw-new" type="password" bind:value={passwordForm.password} />
+                        <Input
+                            id="pw-new"
+                            type="password"
+                            bind:value={passwordForm.password}
+                        />
                         {#if $page.props.errors?.password}
-                            <p class="text-sm text-destructive">{$page.props.errors.password}</p>
+                            <p class="text-sm text-destructive">
+                                {$page.props.errors.password}
+                            </p>
                         {/if}
                     </div>
 
@@ -279,12 +326,12 @@
                         disabled={passwordProcessing}
                         variant="outline"
                     >
-                        {passwordProcessing ? "Aggiornamento..." : "Aggiorna password"}
+                        {passwordProcessing
+                            ? "Aggiornamento..."
+                            : "Aggiorna password"}
                     </Button>
                 </Card.Footer>
             </Card.Root>
         </div>
     </div>
 </AdminLayout>
-
-

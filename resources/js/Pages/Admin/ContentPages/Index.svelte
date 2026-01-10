@@ -66,14 +66,22 @@
 <AdminLayout title="Contenuti">
     {#snippet headerActions()}
         {#if editing}
-            <Button variant="outline" onclick={reset}>Nuova pagina</Button>
+            <Button variant="outline" size="sm" onclick={reset}>Nuova pagina</Button>
         {/if}
     {/snippet}
 
-    <div class="space-y-6">
-        <p class="text-sm text-muted-foreground">
-                    Pagine pubbliche pubblicabili su <code>/p/{'{'}slug{'}'}</code>.
+    <div class="@container/main space-y-6">
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Pagine del Sito</h1>
+                <p class="text-sm text-muted-foreground">
+                    Gestisci i contenuti informativi e le pagine pubbliche
+                    pubblicabili su <code>/p/{'{'}slug{'}'}</code>.
                 </p>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card.Root>

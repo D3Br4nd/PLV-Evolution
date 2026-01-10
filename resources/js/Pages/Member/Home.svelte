@@ -3,7 +3,13 @@
     import MemberLayout from "@/layouts/MemberLayout.svelte";
     import { page } from "@inertiajs/svelte";
     import { Button } from "@/lib/components/ui/button";
-    import { QrCode, CalendarDays, Bell, Users } from "lucide-svelte";
+    import {
+        QrCode,
+        CalendarDays,
+        Bell,
+        Users,
+        Briefcase,
+    } from "lucide-svelte";
     import { cn } from "@/lib/utils/cn";
     import { buttonVariants } from "@/lib/components/ui/button";
     import { Link } from "@inertiajs/svelte";
@@ -96,6 +102,28 @@
                     <div class="font-semibold">Comitati</div>
                     <div class="text-xs text-muted-foreground">
                         Bacheche e membri dei tuoi gruppi
+                    </div>
+                </div>
+            </div>
+        </Link>
+
+        <Link
+            href="/me/projects"
+            class={cn(
+                "block rounded-xl border bg-card hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors",
+                "focus:outline-none focus:ring-2 focus:ring-ring",
+            )}
+        >
+            <div class="flex items-center gap-4 px-4 py-4">
+                <div
+                    class="flex h-10 w-10 items-center justify-center rounded-lg border bg-background"
+                >
+                    <Briefcase class="size-6 text-primary" />
+                </div>
+                <div class="min-w-0">
+                    <div class="font-semibold">Progetti</div>
+                    <div class="text-xs text-muted-foreground">
+                        I tuoi task e stati progetto
                     </div>
                 </div>
             </div>

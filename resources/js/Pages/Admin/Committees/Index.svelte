@@ -33,13 +33,22 @@
 <AdminLayout title="Comitati">
     <div class="space-y-6">
         <div
-            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
-            <p class="text-sm text-muted-foreground">
-                Gestisci i comitati della Pro Loco e i loro membri.
-            </p>
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">
+                    Gestione Comitati
+                </h1>
+                <p class="text-sm text-muted-foreground">
+                    Organizza i comitati della Pro Loco, gestisci i membri e
+                    monitora le attività della bacheca.
+                </p>
+            </div>
             {#if committees.length > 0}
-                <Button onclick={() => (createDialogOpen = true)}>
+                <Button
+                    class="shadow-sm"
+                    onclick={() => (createDialogOpen = true)}
+                >
                     <PlusIcon class="mr-2 size-4" />
                     Crea Comitato
                 </Button>

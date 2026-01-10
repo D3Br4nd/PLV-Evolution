@@ -147,11 +147,24 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title');
-            $table->text('description')->nullable();
+            $table->text('description')->nullable(); // Short description
+            $table->text('content')->nullable();     // Rich text content
             $table->string('status')->default('todo'); 
             $table->string('priority')->default('medium');
-            $table->uuid('assignee_id')->nullable();
+            $table->timestamp('deadline')->nullable();
+            $table->foreignUuid('committee_id')->nullable()->constrained('committees')->nullOnDelete();
+            $table->uuid('assignee_id')->nullable(); // Legacy single assignee
             $table->timestamps();
+        });
+
+        // Project Members (Pivot)
+        Schema::create('project_user', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('project_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['project_id', 'user_id']);
         });
 
         // Committee Members (Pivot)

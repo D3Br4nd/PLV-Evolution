@@ -14,18 +14,23 @@
 
 <AdminLayout title="Dashboard">
     <div class="space-y-6">
-        {#snippet headerActions()}
-            <Button
-                variant="outline"
-                onclick={() => router.get("/admin/members")}
-            >
-                Vai ai soci
-            </Button>
-        {/snippet}
-
-        <p class="text-sm text-muted-foreground">
-            Benvenuto nel pannello amministrativo Pro Loco Venticanese
-        </p>
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Dashboard Amministrativa</h1>
+                <p class="text-sm text-muted-foreground">
+                    Benvenuto nel pannello gestionale della Pro Loco Venticanese.
+                </p>
+            </div>
+            {#snippet headerActions()}
+                <Button
+                    variant="outline"
+                    class="shadow-sm"
+                    onclick={() => router.get("/admin/members")}
+                >
+                    Gestione Soci
+                </Button>
+            {/snippet}
+        </div>
 
         <!-- Stats Grid -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -117,4 +117,15 @@ class User extends Authenticatable
             ->withPivot('id', 'role', 'joined_at')
             ->withTimestamps();
     }
+
+    /**
+     * Get the projects assigned to the user.
+     */
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_user')
+            ->using(ProjectUser::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
 }

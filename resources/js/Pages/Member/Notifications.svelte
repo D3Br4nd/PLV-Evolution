@@ -110,15 +110,31 @@
         router.delete(`/me/notifications/${id}`, { preserveScroll: true });
     }
 
+    let displayNotifications = $derived.by(() => {
+        if (!notifications?.data) return [];
+        
+        // Group by project_id or broadcast_id to show only the latest
+        const map = new Map();
+        
+        notifications.data.forEach(n => {
+            const projectId = n.data?.project_id;
+            const broadcastId = n.data?.broadcast_id;
+            const key = projectId ? `project_${projectId}` : (broadcastId ? `broadcast_${broadcastId}` : n.id);
+            
+            if (!map.has(key)) {
+                map.set(key, n);
+            } else {
+                // If the one in map is older (though list usually sorted desc), replace it?
+                // Actually Laravel usually sends them latest first, so map.has(key) is already the latest.
+            }
+        });
+        
+        return Array.from(map.values());
+    });
+
     function titleOf(n) {
         const data = n?.data || {};
-        let title = data?.title || "Notifica";
-        
-        // Strip legacy prefixes for a cleaner UI as we have badges now
-        return title
-            .replace(/^Nuovo [Ee]vento: /, '')
-            .replace(/^Nuovo post nel comitato: /, '')
-            .replace(/^Nuovo [Pp]ost: /, '');
+        return data?.title || "Notifica";
     }
 
     function bodyOf(n) {
@@ -143,14 +159,15 @@
                 >
             </Card.Header>
             <Card.Content class="space-y-3">
-                {#if notifications?.data?.length}
-                    {#each notifications.data as n (n.id)}
+                {#if displayNotifications.length}
+                    {#each displayNotifications as n (n.id)}
                         {@const type = n.data?.type || 'unknown'}
                         <div class={[
                             "rounded-lg border p-3 transition-all duration-200",
                             type === 'broadcast' ? "border-zinc-800 bg-zinc-50 dark:border-zinc-200 dark:bg-zinc-900/50" : "",
                             type === 'committee_post' ? "border-zinc-300 bg-zinc-100/30 dark:border-zinc-700 dark:bg-zinc-800/30" : "",
                             type === 'event' ? "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black" : "",
+                            type === 'project_update' ? "border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/30" : "",
                             !n.read_at ? "shadow-md ring-1 ring-primary/10 -translate-y-[1px]" : "opacity-80"
                         ].join(" ")}>
                             <div class="flex items-start justify-between gap-3">
@@ -167,6 +184,8 @@
                                                     <Badge variant="secondary" class="text-[9px] h-4 px-1 uppercase">Comitato</Badge>
                                                 {:else if type === 'event'}
                                                     <Badge variant="outline" class="text-[9px] h-4 px-1 uppercase">Evento</Badge>
+                                                {:else if type === 'project_update'}
+                                                    <Badge variant="secondary" class="text-[9px] h-4 px-1 uppercase border-blue-400 text-blue-700 bg-blue-50">Progetto</Badge>
                                                 {/if}
                                             </div>
                                             <div class="font-medium truncate">
@@ -188,6 +207,8 @@
                                                 <Badge variant="secondary" class="text-[9px] h-4 px-1 uppercase">Comitato</Badge>
                                             {:else if type === 'event'}
                                                 <Badge variant="outline" class="text-[9px] h-4 px-1 uppercase">Evento</Badge>
+                                            {:else if type === 'project_update'}
+                                                <Badge variant="secondary" class="text-[9px] h-4 px-1 uppercase border-blue-400 text-blue-700 bg-blue-50">Progetto</Badge>
                                             {/if}
                                         </div>
                                         <div class="font-medium truncate">

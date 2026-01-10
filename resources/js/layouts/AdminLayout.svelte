@@ -6,7 +6,7 @@
     import FlashToasts from "@/lib/components/FlashToasts.svelte";
     import { Toaster } from "svelte-sonner";
 
-    let { title = "Admin", children, headerActions } = $props();
+    let { title = "Admin", children, headerActions, breadcrumbs = [] } = $props();
 </script>
 
 <svelte:head>
@@ -20,7 +20,7 @@
     <Toaster richColors />
     <AppSidebar variant="inset" />
     <Sidebar.Inset>
-        <SiteHeader {title} {headerActions} />
+        <SiteHeader {title} {headerActions} {breadcrumbs} />
         <div class="flex flex-1 flex-col">
             <div class="@container/main flex flex-1 flex-col gap-2">
                 <div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

@@ -6,4 +6,9 @@
     root * /app/public
     encode zstd br gzip
     php_server
+
+    log {
+        output stdout
+        format json
+    }
 }
