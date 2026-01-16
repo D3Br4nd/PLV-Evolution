@@ -68,12 +68,22 @@
     let eventsByDay = $derived.by(() => {
         const map = new Map();
         for (const e of events || []) {
-            const d = e?.start_date ? new Date(e.start_date) : null;
-            if (!d || Number.isNaN(d.getTime())) continue;
-            const key = ymd(d);
-            const arr = map.get(key) || [];
-            arr.push(e);
-            map.set(key, arr);
+            const start = e?.start_date ? new Date(e.start_date) : null;
+            const end = e?.end_date ? new Date(e.end_date) : null;
+            
+            if (!start || Number.isNaN(start.getTime())) continue;
+            
+            // Loop through each day from start to end
+            const curr = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            const last = end ? new Date(end.getFullYear(), end.getMonth(), end.getDate()) : curr;
+            
+            while (curr <= last) {
+                const key = ymd(curr);
+                const arr = map.get(key) || [];
+                arr.push(e);
+                map.set(key, arr);
+                curr.setDate(curr.getDate() + 1);
+            }
         }
         return map;
     });

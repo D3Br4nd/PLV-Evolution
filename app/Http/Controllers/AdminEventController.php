@@ -23,10 +23,8 @@ class AdminEventController extends Controller
         $start = $date->copy()->startOfMonth()->startOfWeek(Carbon::MONDAY);
         $end = $date->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
 
-        $query = Event::where(function ($q) use ($start, $end) {
-            $q->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('end_date', [$start, $end]);
-        });
+        $query = Event::where('start_date', '<=', $end)
+            ->where('end_date', '>=', $start);
 
         if ($filterType) {
             $query->where('type', $filterType);

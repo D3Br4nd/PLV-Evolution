@@ -19,8 +19,8 @@ class MemberEventsController extends Controller
         $end = $date->copy()->endOfMonth()->endOfDay();
 
         $events = Event::query()
-            ->whereBetween('start_date', [$start, $end])
-            ->orWhereBetween('end_date', [$start, $end])
+            ->where('start_date', '<=', $end)
+            ->where('end_date', '>=', $start)
             ->orderBy('start_date')
             ->get();
 

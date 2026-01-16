@@ -26,7 +26,6 @@ services:
             - .env
         environment:
             SERVER_NAME: 'http://:8000'
-            # Use unique container names on the shared `plv_network` to avoid DNS collisions (e.g. other stacks also using `db` / `redis`).
             DB_HOST: plv_evo_db
             REDIS_HOST: plv_evo_redis
         networks:
@@ -50,7 +49,6 @@ services:
             POSTGRES_USER: '${DB_USERNAME:-sail}'
             POSTGRES_PASSWORD: '${DB_PASSWORD:-password}'
         volumes:
-            # Postgres 18+ expects a single mount at /var/lib/postgresql (it will create versioned subdirs)
             - './docker/pgsql:/var/lib/postgresql'
         networks:
             - plv_network
@@ -108,6 +106,30 @@ services:
             interval: 10s
             timeout: 3s
             retries: 10
+
+    worker:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: plv_evo_worker
+        restart: unless-stopped
+        command: php artisan queue:work --tries=3 --timeout=90
+        env_file:
+            - .env
+        environment:
+            DB_HOST: plv_evo_db
+            REDIS_HOST: plv_evo_redis
+        volumes:
+            - './docker/storage:/app/storage'
+        networks:
+            - plv_network
+        depends_on:
+            init:
+                condition: service_completed_successfully
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
     
     vite:
         image: 'node:24.12.0'
@@ -125,10 +147,6 @@ services:
         environment:
             VITE_HOST: '0.0.0.0'
             # HMR is enabled only when VITE_HMR_HOST is set (see vite.config.js).
-            # Override these in your .env when running behind a reverse proxy:
-            #   VITE_HMR_HOST=viteevo.prolocoventicano.com
-            #   VITE_HMR_PROTOCOL=wss
-            #   VITE_HMR_CLIENT_PORT=443
             VITE_HMR_HOST: ${VITE_HMR_HOST:-}
             VITE_HMR_PROTOCOL: ${VITE_HMR_PROTOCOL:-ws}
             VITE_HMR_CLIENT_PORT: ${VITE_HMR_CLIENT_PORT:-5173}

@@ -8,7 +8,9 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 use NotificationChannels\WebPush\WebPushChannel;
 
-class NewEventNotification extends Notification
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class NewEventNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
