@@ -56,6 +56,16 @@ class AdminEventController extends Controller
             'metadata' => 'nullable|array',
         ]);
 
+        // Fix Timezone: Input is assumed to be in App Timezone (e.g. Europe/Rome)
+        $appTimezone = config('app.timezone');
+        
+        if (isset($validated['start_date'])) {
+            $validated['start_date'] = Carbon::parse($validated['start_date'], $appTimezone);
+        }
+        if (isset($validated['end_date'])) {
+            $validated['end_date'] = Carbon::parse($validated['end_date'], $appTimezone);
+        }
+
         $event = Event::create($validated);
 
         // Send notification to all active members
@@ -80,6 +90,16 @@ class AdminEventController extends Controller
             'committee_id' => 'nullable|uuid|exists:committees,id',
             'metadata' => 'nullable|array',
         ]);
+
+        // Fix Timezone for Update
+        $appTimezone = config('app.timezone');
+
+        if (isset($validated['start_date'])) {
+            $validated['start_date'] = Carbon::parse($validated['start_date'], $appTimezone);
+        }
+        if (isset($validated['end_date'])) {
+            $validated['end_date'] = Carbon::parse($validated['end_date'], $appTimezone);
+        }
 
         $event->update($validated);
 

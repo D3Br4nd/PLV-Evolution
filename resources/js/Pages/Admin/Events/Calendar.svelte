@@ -14,6 +14,7 @@
     import { Textarea } from "@/lib/components/ui/textarea";
     import { Label } from "@/lib/components/ui/label";
 
+    /** @type {{ events: any[], currentDate: string, filterType: string|null, committees: any[] }} */
     let { events, currentDate, filterType = null, committees = [] } = $props();
 
     // State for Date Navigation
@@ -91,17 +92,24 @@
 
     function getEventsForDay(date) {
         if (!date) return [];
-        // Correction: Use local time for YYYY-MM-DD construction to avoid UTC shift
+
+        // Target date in local time string "YYYY-MM-DD"
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
-        const dateStr = `${year}-${month}-${day}`;
+        const targetDateStr = `${year}-${month}-${day}`;
 
-        // Simple logic: return events that encompass this day
         return events.filter((e) => {
-            const start = e.start_date.split("T")[0];
-            const end = e.end_date.split("T")[0];
-            return dateStr >= start && dateStr <= end;
+            // Convert UTC strings to Local Date objects
+            const startDate = new Date(e.start_date);
+            const endDate = new Date(e.end_date);
+
+            // Format to "YYYY-MM-DD" in Local Time
+            const startStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, "0")}-${String(startDate.getDate()).padStart(2, "0")}`;
+            const endStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
+
+            // Check overlap
+            return targetDateStr >= startStr && targetDateStr <= endStr;
         });
     }
 
@@ -121,6 +129,7 @@
     let isEditEventOpen = $state(false);
     let isDialogOpen = $state(false);
     let isDeleteConfirmOpen = $state(false);
+    /** @type {any} */
     let selectedEvent = $state(null);
     let loading = $state(false);
 
@@ -165,24 +174,34 @@
         e.preventDefault();
         selectedEvent = event;
 
-        // Extract time from ISO datetime string (format: "2024-01-15T14:30:00")
-        const extractTime = (dateTimeStr) => {
-            if (!dateTimeStr) return "09:00";
-            const parts = dateTimeStr.split("T");
-            if (parts.length < 2) return "09:00";
-            return parts[1].substring(0, 5); // Get HH:MM from HH:MM:SS
+        // Helper to format Date to "YYYY-MM-DD" (Local)
+        const toDateStr = (d) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
         };
+
+        // Helper to format Date to "HH:MM" (Local)
+        const toTimeStr = (d) => {
+            const hours = String(d.getHours()).padStart(2, "0");
+            const mins = String(d.getMinutes()).padStart(2, "0");
+            return `${hours}:${mins}`;
+        };
+
+        const startDate = new Date(event.start_date);
+        const endDate = new Date(event.end_date);
 
         eventForm = {
             id: event.id,
             title: event.title,
-            start_date: event.start_date.split("T")[0],
-            end_date: event.end_date.split("T")[0],
-            start_time: extractTime(event.start_date),
-            end_time: extractTime(event.end_date),
+            start_date: toDateStr(startDate),
+            end_date: toDateStr(endDate),
+            start_time: toTimeStr(startDate),
+            end_time: toTimeStr(endDate),
             type: event.type,
             description: event.description || "",
-            committee_id: event.committee_id || "none", // Use "none" for null in select to handle better
+            committee_id: event.committee_id || "none",
         };
         isEditEventOpen = true;
         isNewEventOpen = false;
@@ -249,25 +268,39 @@
     {/snippet}
 
     <div class="h-full flex flex-col space-y-6">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div
+            class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
             <div>
-                <h1 class="text-3xl font-bold tracking-tight">Calendario Eventi</h1>
-                <p class="text-sm text-muted-foreground uppercase tracking-wide font-medium">
-                    {current.toLocaleString("it-IT", { month: "long", year: "numeric" })}
+                <h1 class="text-3xl font-bold tracking-tight">
+                    Calendario Eventi
+                </h1>
+                <p
+                    class="text-sm text-muted-foreground uppercase tracking-wide font-medium"
+                >
+                    {current.toLocaleString("it-IT", {
+                        month: "long",
+                        year: "numeric",
+                    })}
                 </p>
             </div>
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2 border rounded-md p-1 bg-background shadow-sm">
+                <div
+                    class="flex items-center gap-2 border rounded-md p-1 bg-background shadow-sm"
+                >
                     <Button
                         variant="ghost"
                         size="icon"
                         class="size-8"
                         onclick={previousMonth}
                         aria-label="Mese precedente"
+                        disabled={false}
                     >
                         <ChevronLeft class="size-4" />
                     </Button>
-                    <div class="text-xs font-bold px-2 min-w-[100px] text-center capitalize">
+                    <div
+                        class="text-xs font-bold px-2 min-w-[100px] text-center capitalize"
+                    >
                         {current.toLocaleString("it-IT", { month: "short" })}
                     </div>
                     <Button
@@ -276,11 +309,16 @@
                         class="size-8"
                         onclick={nextMonth}
                         aria-label="Mese successivo"
+                        disabled={false}
                     >
                         <ChevronRight class="size-4" />
                     </Button>
                 </div>
-                <Button onclick={() => openNewEvent(new Date())} class="shadow-sm">
+                <Button
+                    onclick={() => openNewEvent(new Date())}
+                    class="shadow-sm"
+                    disabled={false}
+                >
                     Nuovo evento
                 </Button>
             </div>
@@ -290,7 +328,9 @@
         <div class="flex items-center justify-between gap-4 pb-4 border-b">
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
-                    <span class="text-sm text-muted-foreground">Filtra per tipo:</span>
+                    <span class="text-sm text-muted-foreground"
+                        >Filtra per tipo:</span
+                    >
                     <Select.Root
                         type="single"
                         value={filterType || "all"}
@@ -309,7 +349,9 @@
                             </span>
                         </Select.Trigger>
                         <Select.Content>
-                            <Select.Item value="all">Tutti gli eventi</Select.Item>
+                            <Select.Item value="all"
+                                >Tutti gli eventi</Select.Item
+                            >
                             <Select.Item value="meeting">Riunione</Select.Item>
                             <Select.Item value="event">Evento</Select.Item>
                             <Select.Item value="fair">Fiera</Select.Item>
@@ -400,7 +442,11 @@
             </Dialog.Header>
 
             <div class="mt-4 space-y-3">
-                <Input bind:value={eventForm.title} placeholder="Titolo" />
+                <Input
+                    bind:value={eventForm.title}
+                    placeholder="Titolo"
+                    type="text"
+                />
                 <div class="grid grid-cols-2 gap-2">
                     <label class="block">
                         <span class="text-xs text-muted-foreground mb-1 block"
@@ -488,6 +534,8 @@
                         <Button
                             variant="outline"
                             href={`/admin/events/${selectedEvent.id}/checkins`}
+                            onclick={() => {}}
+                            disabled={false}
                         >
                             Check-in
                         </Button>
