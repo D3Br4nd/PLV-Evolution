@@ -166,7 +166,7 @@
     }
 
     function handleExport() {
-        window.location.href = "/admin/members/export";
+        window.location.assign("/admin/members/export");
     }
 
     function openImportDialog() {
@@ -219,17 +219,23 @@
             <div class="flex items-center gap-2">
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
-                        <Button variant="outline" class="shadow-sm">
-                            <MoreVertical class="h-4 w-4 mr-2" />
-                            Azioni
-                        </Button>
+                        {#snippet child({ props })}
+                            <Button
+                                {...props}
+                                variant="outline"
+                                class="shadow-sm"
+                            >
+                                <MoreVertical class="h-4 w-4 mr-2" />
+                                Azioni
+                            </Button>
+                        {/snippet}
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content align="end">
-                        <DropdownMenu.Item onclick={handleExport}>
+                        <DropdownMenu.Item onSelect={handleExport}>
                             <Download class="h-4 w-4 mr-2" />
                             Esporta CSV
                         </DropdownMenu.Item>
-                        <DropdownMenu.Item onclick={openImportDialog}>
+                        <DropdownMenu.Item onSelect={openImportDialog}>
                             <Upload class="h-4 w-4 mr-2" />
                             Importa CSV
                         </DropdownMenu.Item>

@@ -61,9 +61,11 @@
         visit(d);
     }
 
+    /** @param {Date} date */
     function visit(date) {
         let year = date.getFullYear();
         let month = date.getMonth() + 1;
+        /** @type {{ year: number, month: number, type?: string | null }} */
         const params = { year, month };
 
         if (filterType) {
@@ -73,7 +75,9 @@
         router.get("/admin/events", params, { preserveState: false });
     }
 
+    /** @param {string | null} type */
     function setFilter(type) {
+        /** @type {{ year: number, month: number, type?: string | null }} */
         const params = {
             year: current.getFullYear(),
             month: current.getMonth() + 1,
@@ -90,6 +94,7 @@
         setFilter(null);
     }
 
+    /** @param {Date | null} date */
     function getEventsForDay(date) {
         if (!date) return [];
 
@@ -114,7 +119,9 @@
     }
 
     // Get color class for event type
+    /** @param {string} type */
     function getEventColor(type) {
+        /** @type {Record<string, string>} */
         const colors = {
             meeting: "bg-blue-500 text-white",
             event: "bg-green-500 text-white",
@@ -133,6 +140,20 @@
     let selectedEvent = $state(null);
     let loading = $state(false);
 
+    /**
+     * @typedef {Object} EventForm
+     * @property {string|null} id
+     * @property {string} title
+     * @property {string} start_date
+     * @property {string} end_date
+     * @property {string} start_time
+     * @property {string} end_time
+     * @property {string} type
+     * @property {string} description
+     * @property {string|null} committee_id
+     */
+
+    /** @type {EventForm} */
     let eventForm = $state({
         id: null,
         title: "",
@@ -145,6 +166,7 @@
         committee_id: null,
     });
 
+    /** @param {Date | null} date */
     function openNewEvent(date) {
         if (!date) return;
         // Correction: Use local time for YYYY-MM-DD format to avoid timezone shifts
@@ -169,12 +191,17 @@
         isDialogOpen = true;
     }
 
+    /**
+     * @param {any} event
+     * @param {MouseEvent | KeyboardEvent} e
+     */
     function openEditEvent(event, e) {
         e.stopPropagation();
         e.preventDefault();
         selectedEvent = event;
 
         // Helper to format Date to "YYYY-MM-DD" (Local)
+        /** @param {Date} d */
         const toDateStr = (d) => {
             const year = d.getFullYear();
             const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -183,6 +210,7 @@
         };
 
         // Helper to format Date to "HH:MM" (Local)
+        /** @param {Date} d */
         const toTimeStr = (d) => {
             const hours = String(d.getHours()).padStart(2, "0");
             const mins = String(d.getMinutes()).padStart(2, "0");
@@ -545,8 +573,10 @@
                             <Button
                                 {...props}
                                 variant="outline"
-                                disabled={loading}>Annulla</Button
+                                disabled={loading}
                             >
+                                Annulla
+                            </Button>
                         {/snippet}
                     </Dialog.Close>
                     <Button onclick={submitEvent} disabled={loading}>
@@ -571,6 +601,7 @@
                 <Button
                     variant="outline"
                     onclick={() => (isDeleteConfirmOpen = false)}
+                    disabled={false}
                 >
                     Annulla
                 </Button>

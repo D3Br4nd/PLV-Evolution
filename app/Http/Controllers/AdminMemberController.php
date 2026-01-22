@@ -384,23 +384,9 @@ class AdminMemberController extends Controller
     public function exportCsv()
     {
         $year = now()->year;
-        
-        $members = User::query()
-            ->with(['memberships' => fn($q) => $q->where('year', $year)])
-            ->orderBy('name')
-            ->get();
-
         $filename = 'soci_' . now()->format('Y-m-d') . '.csv';
         
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
-
-        $callback = function () use ($members, $year) {
+        return response()->streamDownload(function () use ($year) {
             $file = fopen('php://output', 'w');
             
             // UTF-8 BOM for Excel compatibility
@@ -434,59 +420,63 @@ class AdminMemberController extends Controller
                 'Stato Account',
             ]);
 
-            // Data rows
-            foreach ($members as $member) {
-                try {
-                    $hasMembership = $member->memberships && $member->memberships->count() > 0;
-                    $mustSetPassword = $member->must_set_password ? 'Da attivare' : 'Attivo';
-                    
-                    // Safely get role value (avoid Enum casting errors)
-                    $roleValue = 'member';
+            // Data rows - Use cursor for memory efficiency
+            User::query()
+                ->with(['memberships' => fn($q) => $q->where('year', $year)])
+                ->orderBy('name')
+                ->cursor()
+                ->each(function ($member) use ($file, $year) {
                     try {
-                        $roleValue = $member->getRawOriginal('role') ?? 'member';
-                    } catch (\Exception $e) {
+                        $hasMembership = $member->memberships && $member->memberships->count() > 0;
+                        $mustSetPassword = $member->must_set_password ? 'Da attivare' : 'Attivo';
+                        
+                        // Safely get role value (avoid Enum casting errors)
                         $roleValue = 'member';
+                        try {
+                            $roleValue = $member->getRawOriginal('role') ?? 'member';
+                        } catch (\Exception $e) {
+                            $roleValue = 'member';
+                        }
+                        
+                        fputcsv($file, [
+                            $member->id,
+                            $member->name,
+                            $member->first_name ?? '',
+                            $member->last_name ?? '',
+                            $member->email,
+                            $member->phone ?? '',
+                            $roleValue,
+                            $member->plv_role ?? '',
+                            $member->birth_date ? $member->birth_date->format('Y-m-d') : '',
+                            $member->birth_place_type ?? '',
+                            $member->birth_province_code ?? '',
+                            $member->birth_city ?? '',
+                            $member->birth_country ?? '',
+                            $member->residence_type ?? '',
+                            $member->residence_street ?? '',
+                            $member->residence_house_number ?? '',
+                            $member->residence_locality ?? '',
+                            $member->residence_province_code ?? '',
+                            $member->residence_city ?? '',
+                            $member->residence_country ?? '',
+                            $member->plv_joined_at ? $member->plv_joined_at->format('Y-m-d') : '',
+                            $member->plv_expires_at ? $member->plv_expires_at->format('Y-m-d') : '',
+                            $hasMembership ? 'Sì' : 'No',
+                            $mustSetPassword,
+                        ]);
+                    } catch (\Exception $e) {
+                        // Log the error but continue with other members
+                        \Log::warning('Error exporting member to CSV', [
+                            'member_id' => $member->id ?? 'unknown',
+                            'error' => $e->getMessage(),
+                        ]);
                     }
-                    
-                    fputcsv($file, [
-                        $member->id,
-                        $member->name,
-                        $member->first_name ?? '',
-                        $member->last_name ?? '',
-                        $member->email,
-                        $member->phone ?? '',
-                        $roleValue,
-                        $member->plv_role ?? '',
-                        $member->birth_date ? $member->birth_date->format('Y-m-d') : '',
-                        $member->birth_place_type ?? '',
-                        $member->birth_province_code ?? '',
-                        $member->birth_city ?? '',
-                        $member->birth_country ?? '',
-                        $member->residence_type ?? '',
-                        $member->residence_street ?? '',
-                        $member->residence_house_number ?? '',
-                        $member->residence_locality ?? '',
-                        $member->residence_province_code ?? '',
-                        $member->residence_city ?? '',
-                        $member->residence_country ?? '',
-                        $member->plv_joined_at ? $member->plv_joined_at->format('Y-m-d') : '',
-                        $member->plv_expires_at ? $member->plv_expires_at->format('Y-m-d') : '',
-                        $hasMembership ? 'Sì' : 'No',
-                        $mustSetPassword,
-                    ]);
-                } catch (\Exception $e) {
-                    // Log the error but continue with other members
-                    Log::warning('Error exporting member to CSV', [
-                        'member_id' => $member->id ?? 'unknown',
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
+                });
 
             fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**

@@ -38,6 +38,11 @@ class RedirectMobileAdmin
 
         $preferAdminUi = $request->session()->get('ui.prefer') === 'admin';
         
+        // Allow export routes to bypass redirection (so downloads work on mobile)
+        if (str_ends_with($path, '/export')) {
+            return $next($request);
+        }
+
         \Log::info('Mobile Admin Access Check', [
             'user' => $user->email,
             'path' => $request->path(),
