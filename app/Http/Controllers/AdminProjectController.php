@@ -135,7 +135,19 @@ class AdminProjectController extends Controller
 
         return redirect()->back();
     }
-    
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Project $project)
+    {
+        $project->load(['assignee', 'members', 'committee']);
+
+        return Inertia::render('Admin/Projects/Show', [
+            'project' => $project,
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

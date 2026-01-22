@@ -34,6 +34,7 @@
 </script>
 
 <script>
+	/** @type {{ class?: string, variant?: any, size?: any, ref?: any, href?: string, type?: "button" | "submit" | "reset", disabled?: boolean, onclick?: any, children?: any }} */
 	let {
 		class: className = "",
 		variant = "default",
@@ -42,7 +43,7 @@
 		href = undefined,
 		type = "button",
 		disabled = false,
-		onclick,
+		onclick = undefined,
 		children,
 		...restProps
 	} = $props();

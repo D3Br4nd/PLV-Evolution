@@ -108,6 +108,18 @@ class AdminEventController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Event $event)
+    {
+        $event->load('committee:id,name');
+
+        return Inertia::render('Admin/Events/Show', [
+            'event' => $event,
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Event $event)

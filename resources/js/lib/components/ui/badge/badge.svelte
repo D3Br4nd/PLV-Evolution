@@ -11,7 +11,8 @@
 					"bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 border-transparent",
 				destructive:
 					"bg-destructive [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/70 border-transparent text-white",
-				outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+				outline:
+					"text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
 			},
 		},
 		defaultVariants: {
@@ -25,7 +26,7 @@
 
 	let {
 		ref = $bindable(null),
-		href,
+		href = undefined,
 		class: className = "",
 		variant = "default",
 		children,
@@ -38,7 +39,10 @@
 	bind:this={ref}
 	data-slot="badge"
 	{href}
-	class={cn(badgeVariants({ variant }), className)}
+	class={cn(
+		badgeVariants({ variant: /** @type {any} */ (variant) }),
+		className,
+	)}
 	{...restProps}
 >
 	{@render children?.()}
