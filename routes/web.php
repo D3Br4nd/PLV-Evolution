@@ -59,6 +59,7 @@ Route::middleware('auth')->get('/ui/me', function (Request $request) {
 })->name('ui.me');
 
 Route::middleware('auth')->get('/me/card', [MemberCardController::class, 'show'])->name('member.card');
+Route::middleware('auth')->get('/me/card/pdf', [MemberCardController::class, 'downloadPdf'])->name('member.card.pdf');
 Route::middleware('auth')->get('/me', [MemberHomeController::class, 'show'])->name('member.home');
 Route::middleware('auth')->get('/me/uuid', [MemberUuidController::class, 'show'])->name('member.uuid');
 Route::middleware('auth')->get('/me/events', [MemberEventsController::class, 'index'])->name('member.events');
@@ -177,6 +178,8 @@ Route::middleware(['auth', 'role:super_admin,admin', 'mobile.admin'])->prefix('a
         ->name('members.avatar.update');
     Route::delete('members/{member}/avatar', [\App\Http\Controllers\AdminMemberController::class, 'destroyMemberAvatar'])
         ->name('members.avatar.destroy');
+    Route::get('members/{member}/card/pdf', [\App\Http\Controllers\AdminMemberController::class, 'downloadCardPdf'])
+        ->name('members.card.pdf');
     
     Route::patch('members/{member}/role', \App\Http\Controllers\AdminMemberRoleController::class.'@update')
         ->name('members.role.update')

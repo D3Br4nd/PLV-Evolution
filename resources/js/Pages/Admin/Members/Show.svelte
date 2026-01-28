@@ -16,9 +16,12 @@
 
     import italyPlaces from "@/data/italy_places.json";
 
+    /** @type {{ member: any, year: number }} */
     let { member, year } = $props();
     let flash = $derived($page.props.flash);
+    /** @type {Record<string, string>} */
     let serverErrors = $derived($page.props.errors || {});
+    /** @type {Record<string, string>} */
     let errorsLocal = $state({});
 
     // Confirmation Dialogs
@@ -28,16 +31,20 @@
     let inviteUrl = $derived($page.props?.flash?.invite_url);
 
     let uuid = $derived(member?.id);
+    /** @type {string | null} */
     let qrDataUrl = $state(null);
     let hydrated = $state(false);
 
     // Avatar upload state
+    /** @type {File | null} */
     let selectedAvatarFile = $state(null);
+    /** @type {HTMLInputElement | null} */
     let avatarInputRef = $state(null);
     let avatarUrl = $derived(
         member?.avatar_path ? `/storage/${member.avatar_path}` : null,
     );
 
+    /** @param {any} v */
     function dateOnly(v) {
         if (!v) return "";
         if (typeof v !== "string") return "";
@@ -142,6 +149,7 @@
         hydrated = true;
     });
 
+    /** @param {string} dateStr */
     function addOneYear(dateStr) {
         if (!dateStr) return "";
         const d = new Date(dateStr + "T00:00:00");
@@ -156,9 +164,11 @@
     let expiresPreview = $derived(addOneYear(form.plv_joined_at));
 
     let citiesForBirthProvince = $derived(
+        // @ts-ignore
         italyPlaces.citiesByProvince?.[form.birth_province_code] ?? [],
     );
     let citiesForResidenceProvince = $derived(
+        // @ts-ignore
         italyPlaces.citiesByProvince?.[form.residence_province_code] ?? [],
     );
 
@@ -172,6 +182,7 @@
         const canManageRoles = $page.props.auth?.can?.manageRoles;
         const payload = { ...form };
         if (!canManageRoles) {
+            // @ts-ignore
             delete payload.role;
         }
 
@@ -189,6 +200,7 @@
         );
     }
 
+    /** @param {any} e */
     function handleAvatarChange(e) {
         const file = e.target.files?.[0];
         if (file) {
@@ -303,6 +315,20 @@
                                     Generazione QR...
                                 </div>
                             {/if}
+                        </div>
+
+                        <div class="pt-2">
+                            <Button
+                                variant="outline"
+                                class="w-full h-9"
+                                onclick={() =>
+                                    window.open(
+                                        `/admin/members/${member.id}/card/pdf`,
+                                        "_blank",
+                                    )}
+                            >
+                                Scarica PDF Tessera
+                            </Button>
                         </div>
                     </Card.Content>
                 </Card.Root>
@@ -543,7 +569,7 @@
                                 Link invito (copia ora, non visibile dopo):
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Input value={inviteUrl} readonly />
+                                <Input type="text" value={inviteUrl} readonly />
                                 <Button
                                     variant="secondary"
                                     onclick={() =>
@@ -730,6 +756,7 @@
                                     Nome
                                 </div>
                                 <Input
+                                    type="text"
                                     bind:value={form.first_name}
                                     placeholder="Nome"
                                 />
@@ -739,6 +766,7 @@
                                     Cognome
                                 </div>
                                 <Input
+                                    type="text"
                                     bind:value={form.last_name}
                                     placeholder="Cognome"
                                 />
@@ -760,6 +788,7 @@
                                     Telefono
                                 </div>
                                 <Input
+                                    type="text"
                                     bind:value={form.phone}
                                     placeholder="Numero di telefono"
                                 />
@@ -782,6 +811,7 @@
                                     Nome visualizzato
                                 </div>
                                 <Input
+                                    type="text"
                                     bind:value={form.name}
                                     placeholder="Nome (visualizzato)"
                                 />
@@ -863,6 +893,7 @@
                                             Città
                                         </div>
                                         <Input
+                                            type="text"
                                             bind:value={form.birth_city}
                                             placeholder="Città (estero)"
                                         />
@@ -874,6 +905,7 @@
                                             Nazione
                                         </div>
                                         <Input
+                                            type="text"
                                             bind:value={form.birth_country}
                                             placeholder="Nazione"
                                         />
@@ -910,6 +942,7 @@
                                     Via
                                 </div>
                                 <Input
+                                    type="text"
                                     bind:value={form.residence_street}
                                     placeholder="Via"
                                 />
@@ -919,6 +952,7 @@
                                     Numero civico
                                 </div>
                                 <Input
+                                    type="text"
                                     bind:value={form.residence_house_number}
                                     placeholder="N."
                                 />
@@ -930,6 +964,7 @@
                                 Frazione
                             </div>
                             <Input
+                                type="text"
                                 bind:value={form.residence_locality}
                                 placeholder="Frazione"
                             />
@@ -988,6 +1023,7 @@
                                         Città
                                     </div>
                                     <Input
+                                        type="text"
                                         bind:value={form.residence_city}
                                         placeholder="Città (estero)"
                                     />
@@ -999,6 +1035,7 @@
                                         Nazione
                                     </div>
                                     <Input
+                                        type="text"
                                         bind:value={form.residence_country}
                                         placeholder="Nazione"
                                     />
@@ -1037,9 +1074,12 @@
                                     id="membership-toggle"
                                     checked={member.memberships &&
                                         member.memberships.some(
-                                            (m) => m.year === year,
+                                            (/** @type {{ year: any; }} */ m) =>
+                                                m.year === year,
                                         )}
-                                    onCheckedChange={(checked) => {
+                                    onCheckedChange={(
+                                        /** @type {any} */ checked,
+                                    ) => {
                                         if (checked) {
                                             router.post(
                                                 `/admin/members/${member.id}/membership`,
@@ -1063,7 +1103,11 @@
                                 <div class="text-xs text-muted-foreground mb-1">
                                     Scadenza iscrizione (1 anno)
                                 </div>
-                                <Input value={expiresPreview} disabled />
+                                <Input
+                                    type="text"
+                                    value={expiresPreview}
+                                    disabled
+                                />
                             </div>
                         </div>
 

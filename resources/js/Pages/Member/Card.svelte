@@ -53,6 +53,16 @@
                 <div class="text-xs text-muted-foreground break-all">
                     Socio UUID: {uuid}
                 </div>
+
+                <div class="pt-4">
+                    <Button
+                        variant="secondary"
+                        class="w-full"
+                        onclick={() => window.open("/me/card/pdf", "_blank")}
+                    >
+                        Scarica PDF per Stampa
+                    </Button>
+                </div>
             {:else}
                 <div class="text-sm text-red-400">
                     Nessuna tessera attiva per {year}. Contatta la segreteria.

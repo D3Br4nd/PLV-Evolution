@@ -689,4 +689,42 @@ class AdminMemberController extends Controller
 
         return redirect()->back()->with('success', 'Avatar eliminato con successo.');
     }
+
+    /**
+     * Download member card PDF (admin)
+     */
+    public function downloadCardPdf(User $member)
+    {
+        $year = now()->year;
+        $member->load(['memberships' => fn($q) => $q->where('year', $year)]);
+        
+        $membership = $member->memberships->first();
+
+        if (!$membership) {
+            return back()->with('error', 'Nessuna tessera attiva per l\'anno corrente.');
+        }
+
+        $cardBackPath = public_path('card-back.jpg');
+        $cardBackBase64 = '';
+        if (file_exists($cardBackPath)) {
+            $cardBackBase64 = base64_encode(file_get_contents($cardBackPath));
+        }
+
+        // Generate QR code as SVG base64 (no imagick needed)
+        $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            ->size(200)
+            ->margin(0)
+            ->generate($member->id);
+        $qrCodeBase64 = base64_encode($qrCodeSvg);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.member-card', [
+            'user' => $member,
+            'membership' => $membership,
+            'year' => $year,
+            'cardBackBase64' => $cardBackBase64,
+            'qrCodeBase64' => $qrCodeBase64,
+        ]);
+
+        return $pdf->download("tessera-plv-{$member->id}-{$year}.pdf");
+    }
 }

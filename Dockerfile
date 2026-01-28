@@ -7,7 +7,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 # We run without scripts here because Laravel's Composer scripts need the full app (artisan) present.
 # We'll run `php artisan package:discover` later in the final image after copying the app.
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader --no-scripts
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader --no-scripts --ignore-platform-reqs
 
 FROM node:24-alpine AS assets
 WORKDIR /app
@@ -31,7 +31,9 @@ RUN install-php-extensions \
     gmp \
     intl \
     zip \
-    pcntl
+    pcntl \
+    gd \
+    imagick
 
 # Required for `php artisan schema:dump` on PostgreSQL (uses pg_dump).
 # Our db image is postgres:18.1, so we install the matching client version to avoid version mismatch errors.
